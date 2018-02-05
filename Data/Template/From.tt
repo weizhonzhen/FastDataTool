@@ -1,0 +1,76 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ parameter type="DataModel.EntityInfo" name="entity" #>
+<#@ Assembly Name="$(SolutionDir)Data\bin\Debug\DataModel.dll" #>
+<#@ import namespace="DataModel"#>
+
+@{
+	ViewBag.Title = "<#=entity.fromName#>"
+}
+
+@model <#=entity.nameSpace#>.<#=entity.table.tabName#>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new {@action="<#=entity.fromUrl#>"}))
+{
+<#foreach(var c in entity.columns){#>
+<#if(c.fromType=="select"){#>
+<div class="input-group form-group">
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.DropDownListFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+</div>	
+<#}if(c.fromType=="radio"){#>
+<div class="input-group form-group">
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.RadioFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+</div>		
+<#}if(c.fromType=="checkbox"){#>
+<div class="input-group form-group">
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.CheckBoxFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+</div>		
+<#}if(c.fromType=="file"){#>
+<div class="input-group form-group">
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.FileFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+</div>
+<#}if(c.fromType=="image"){#>
+<div class="input-group form-group">
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.ImageFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+</div>		
+<#}if(c.fromType=="textarea"){#>
+<div class="input-group form-group">
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.TextAreaFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+</div>		
+<#}if(c.fromType=="hidden"){#>
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.HiddenFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })
+<#}if(c.fromType=="date"){#>
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.DateFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })		
+<#}if(c.fromType=="text"){#>
+	 <div class="input-group-addon input-group-none"><#=c.fromName#></div>
+	@Html.TextFor(a => a.<#=c.fromParam#>, new { @class = "form-control" })		
+<#}#>
+<#}#>
+<div class="center">
+<button type="button" class="btn btn-primary center" id="formBtn">确定</button>
+</div>
+}
+<script>
+    $('#formBtn').click(function () {
+        $.ajax({
+            type: "post",
+            url: "<#=entity.fromUrl#>",
+            data: $("#form").serialize(),
+            success: function (result) {
+                if (result.success) {
+                    parent.location.reload(); 
+                } else {
+                    layer.alert(result.msg);
+                }
+            }
+        });
+    });
+</script>

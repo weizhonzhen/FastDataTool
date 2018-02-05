@@ -1,0 +1,17 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ parameter type="DataModel.EntityInfo" name="entity" #>
+<#@ Assembly Name="$(SolutionDir)Data\bin\Debug\DataModel.dll" #>
+<#@ import namespace="DataModel"#>
+
+<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap>
+	<select id="map.<#=entity.table.tabName#>">
+		select * from <#=entity.table.tabName#>
+		<dynamic prepend=" where 1=1 ">
+		<#foreach(var c in entity.columns){#>
+			<isPropertyAvailable prepend=" and " property="<#=c.colName#>"><#=c.colName#>=<#=entity.param#><#=c.colName#></isPropertyAvailable>
+		<#}#> 
+		</dynamic>
+	</select>
+</sqlMap>

@@ -1,0 +1,34 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ parameter type="DataModel.EntityInfo" name="entity" #>
+<#@ Assembly Name="$(SolutionDir)Data\bin\Debug\DataModel.dll" #>
+<#@ import namespace="DataModel"#>
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.ComponentModel;
+using System.Runtime.Serialization;
+
+namespace <#=entity.nameSpace#>
+{
+    /// <summary>
+ 	/// <#=entity.table.tabComments#>
+	/// </summary>
+    [DataContract]
+    public class <#=entity.table.tabName#>
+    {
+<#
+        foreach(var c in entity.columns)
+        {
+#>
+
+        /// <summary>
+ 	    /// <#=c.colComments#>
+	    /// </summary>
+		[DataMember]
+		public <#=c.colType#> <#=c.colName#>{ get; set; }
+<#
+		}
+#>      
+    }
+}

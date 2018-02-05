@@ -1,0 +1,48 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ parameter type="DataModel.EntityInfo" name="entity" #>
+<#@ Assembly Name="$(SolutionDir)Data\bin\Debug\DataModel.dll" #>
+<#@ import namespace="DataModel"#>
+import java.io.Serializable;
+
+package <#=entity.nameSpace#>
+{
+    /// <summary>
+ 	/// <#=entity.table.tabComments#>
+	/// </summary>
+    public class <#=entity.table.tabName#> implements Serializable 
+    {
+<#
+        foreach(var c in entity.columns)
+        {
+#>
+		private <#=c.colType#> _<#=c.colName#>;
+<#
+		}
+#>      
+		public void <#=entity.table.tabName#>(){}
+
+<#
+        foreach(var c in entity.columns)
+        {
+#>
+		/// <summary>
+ 	    /// <#=c.colComments#>
+	    /// </summary>
+		public <#=c.colType#> Get_<#=c.colName#>()
+		{
+			return _<#=c.colName#>;
+		}
+
+		/// <summary>
+ 	    /// <#=c.colComments#>
+	    /// </summary>
+		public void Set_<#=c.colName#>( <#=c.colType#> <#=c.colName#> )
+		{
+			_<#=c.colName#>=<#=c.colName#>;
+		}
+<#
+		}
+#> 
+    }
+}
