@@ -142,7 +142,7 @@ namespace DataModel
         {
             using (var db = new LDB(path))
             {
-                return db.Get(key) == null;
+                return db.Get(key) != null;
             }
         }
         #endregion

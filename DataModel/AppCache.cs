@@ -29,22 +29,22 @@ namespace DataModel
         //表list
         public static List<BaseTable> GetTableList(DataLink link) { return DataCache.Get<List<BaseTable>>(GetTableKey(link)) ??new List<BaseTable>(); }
         public static void SetTableList(List<BaseTable> item, DataLink link) { DataCache.Set<List<BaseTable>>(GetTableKey(link), item); }
-        public static bool ExistsTable(DataLink link) { return DataCache.Exists(GetTableKey(link)) && GetTableList(link).Count != 0; }
+        public static bool ExistsTable(DataLink link) { return DataCache.Exists(GetTableKey(link)); }
 
         //视图list
         public static List<BaseTable> GetViewList(DataLink link) { return DataCache.Get<List<BaseTable>>(GetViewKey(link)) ?? new List<BaseTable>(); }
         public static void SetViewList(List<BaseTable> item, DataLink link) { DataCache.Set<List<BaseTable>>("viewList", item); }
-        public static bool ExistsView(DataLink link) { return DataCache.Exists(GetViewKey(link)) && GetViewList(link).Count != 0; }
+        public static bool ExistsView(DataLink link) { return DataCache.Exists(GetViewKey(link)); }
 
         //表列list
         public static List<BaseColumn> GetColumnList() { return DataCache.Get<List<BaseColumn>>("columnList") ?? new List<BaseColumn>(); }
         public static void SetColumnList(List<BaseColumn> item) { DataCache.Set<List<BaseColumn>>("columnList", item); }
-        public static bool ExistsColumnList() { return DataCache.Exists("columnList") && GetColumnList().Count != 0; }
+        public static bool ExistsColumnList() { return DataCache.Exists("columnList"); }
 
         //视图列list
         public static List<BaseColumn> GetColumnViewList() { return DataCache.Get<List<BaseColumn>>("columnViewList") ?? new List<BaseColumn>(); }
         public static void SetColumnViewList(List<BaseColumn> item) { DataCache.Set<List<BaseColumn>>("columnViewList", item); }
-        public static bool ExistsColumnViewList() { return DataCache.Exists("columnViewList") && GetColumnViewList().Count != 0; }
+        public static bool ExistsColumnViewList() { return DataCache.Exists("columnViewList"); }
 
         //自定义表
         public static BaseTable GetDefineTable() { return DataCache.Get<BaseTable>("defineTable"); }
@@ -81,7 +81,7 @@ namespace DataModel
         //表结构的列
         public static List<BaseColumn> GetTableColumn(string key) { return DataCache.Get<List<BaseColumn>>(key) ?? new List<BaseColumn>(); }
         public static void SetTableColumn(List<BaseColumn> item, string key) { DataCache.Set<List<BaseColumn>>(key, item); }
-        public static bool ExistsTableColumn(string key) { return DataCache.Exists(key) && GetTableColumn(key).Count != 0; }
+        public static bool ExistsTableColumn(string key) { return DataCache.Exists(key); }
         
     }
 }
