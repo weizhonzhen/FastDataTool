@@ -6,6 +6,10 @@ namespace DataModel
     {
         private static string title = "数据工具";
 
+        private static string GetTableKey(DataLink link) { return string.Format("tableList_{0}_{1}_{2}", link.hostName, link.serverName, link.serverValue); }
+        private static string GetViewKey(DataLink link) { return string.Format("viewList_{0}_{1}_{2}", link.hostName, link.serverName, link.serverValue); }
+
+
         //源数据库连接
         public static string GetTitle() { return title; }
         public static void SetTitle(string item) { title=item; }
@@ -23,14 +27,14 @@ namespace DataModel
         public static void SetBuildLink(DataLink item) { DataCache.Set<DataLink>("buildLink", item); }
 
         //表list
-        public static List<BaseTable> GetTableList() { return DataCache.Get<List<BaseTable>>("tableList")??new List<BaseTable>(); }
-        public static void SetTableList(List<BaseTable> item) { DataCache.Set<List<BaseTable>>("tableList", item); }
-        public static bool ExistsTable() { return DataCache.Exists("tableList") && GetTableList().Count != 0; }
+        public static List<BaseTable> GetTableList(DataLink link) { return DataCache.Get<List<BaseTable>>(GetTableKey(link)) ??new List<BaseTable>(); }
+        public static void SetTableList(List<BaseTable> item, DataLink link) { DataCache.Set<List<BaseTable>>(GetTableKey(link), item); }
+        public static bool ExistsTable(DataLink link) { return DataCache.Exists(GetTableKey(link)) && GetTableList(link).Count != 0; }
 
         //视图list
-        public static List<BaseTable> GetViewList() { return DataCache.Get<List<BaseTable>>("viewList") ?? new List<BaseTable>(); }
-        public static void SetViewList(List<BaseTable> item) { DataCache.Set<List<BaseTable>>("viewList", item); }
-        public static bool ExistsView() { return DataCache.Exists("viewList") && GetViewList().Count != 0; }
+        public static List<BaseTable> GetViewList(DataLink link) { return DataCache.Get<List<BaseTable>>(GetViewKey(link)) ?? new List<BaseTable>(); }
+        public static void SetViewList(List<BaseTable> item, DataLink link) { DataCache.Set<List<BaseTable>>("viewList", item); }
+        public static bool ExistsView(DataLink link) { return DataCache.Exists(GetViewKey(link)) && GetViewList(link).Count != 0; }
 
         //表列list
         public static List<BaseColumn> GetColumnList() { return DataCache.Get<List<BaseColumn>>("columnList") ?? new List<BaseColumn>(); }
