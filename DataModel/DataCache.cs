@@ -68,6 +68,7 @@ namespace DataModel
         /// </summary>
         public static T Get<T>(string key) where T : class, new()
         {
+            CheckPath();
             using (var db = new LDB(path))
             {
                 var item = db.Get(key);
@@ -91,6 +92,7 @@ namespace DataModel
         /// <returns></returns>
         public static void Set<T>(string key, T value)
         {
+            CheckPath();
             using (var db = new LDB(path))
             {
                 db.Set(key, value.ToByte());
@@ -107,6 +109,7 @@ namespace DataModel
         /// <returns></returns>
         public static string Get(string key)
         {
+            CheckPath();
             using (var db = new LDB(path))
             {
                 return db.Get(key);
@@ -125,6 +128,7 @@ namespace DataModel
         /// <returns></returns>
         public static void Set(string key, string value)
         {
+            CheckPath();
             using (var db = new LDB(path))
             {
                 db.Set(key, value);
@@ -140,6 +144,7 @@ namespace DataModel
         /// <returns></returns>
         public static bool Exists(string key)
         {
+            CheckPath();
             using (var db = new LDB(path))
             {
                 return db.Get(key) != null;
@@ -154,11 +159,23 @@ namespace DataModel
         /// <param name="Name"></param>
         public static void Clear(string key)
         {
+            CheckPath();
             using (var db = new LDB(path))
             {
                 db.Remove(key);
             }
         }
         #endregion
+
+        /// <summary>
+        /// check path
+        /// </summary>
+        private static void CheckPath()
+        {
+            if (!File.Exists(path))
+            {
+                using (var fs = File.Create(path)) { }
+            }
+        }
     }
 }
