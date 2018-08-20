@@ -172,10 +172,8 @@ namespace DataModel
         /// </summary>
         private static void CheckPath()
         {
-            if (!File.Exists(path))
-            {
-                using (var fs = File.Create(path)) { }
-            }
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
         }
     }
 }
