@@ -9,8 +9,6 @@ using Microsoft.VisualStudio.TextTemplating;
 using System.CodeDom.Compiler;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Windows.Data;
 using System.Windows.Threading;
 using System.Windows.Media;
@@ -98,7 +96,10 @@ namespace Data
             {
                 if (entity.isModel)
                     templateFileName = string.Format("{0}Template\\Model_cs.tt", AppDomain.CurrentDomain.BaseDirectory);
-                
+
+                if (entity.isOldModel)
+                    templateFileName = string.Format("{0}Template\\ModelOld_cs.tt", AppDomain.CurrentDomain.BaseDirectory);
+
                 if (entity.isMap)
                     templateFileName = string.Format("{0}Template\\Map.tt", AppDomain.CurrentDomain.BaseDirectory);
 
@@ -187,167 +188,7 @@ namespace Data
             }
         }
         #endregion
-
-        #region Des 加密 GB2312
-        /// <summary>
-        /// 标签：2015.7.13，魏中针
-        /// 说明：Des 加密 GB2312 
-        /// </summary>
-        /// <param name="Source">要加密（GB2312）字符串</param>
-        /// <returns></returns>
-        public static string EncodeGB2312(string Source)
-        {
-            DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
-            provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-            provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-            byte[] bytes = Encoding.GetEncoding("GB2312").GetBytes(Source);
-            MemoryStream stream = new MemoryStream();
-            CryptoStream stream2 = new CryptoStream(stream, provider.CreateEncryptor(), CryptoStreamMode.Write);
-            stream2.Write(bytes, 0, bytes.Length);
-            stream2.FlushFinalBlock();
-            StringBuilder builder = new StringBuilder();
-            foreach (byte num in stream.ToArray())
-            {
-                builder.AppendFormat("{0:X2}", num);
-            }
-            stream.Close();
-            return builder.ToString();
-        }
-        #endregion
-
-        #region Des 解密 GB2312
-        /// <summary>
-        /// 标签：2015.7.13，魏中针
-        /// 说明：Des 解密 GB2312 
-        /// </summary>
-        /// <param name="Source">要解密（GB2312）的字符串</param>
-        /// <returns></returns>
-        public static string DecodeGB2312(string Source, string refValue = "")
-        {
-            try
-            {
-                DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
-                provider.Key = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-                provider.IV = Encoding.ASCII.GetBytes(p_strKey.Substring(0, 8));
-                byte[] buffer = new byte[Source.Length / 2];
-                for (int i = 0; i < (Source.Length / 2); i++)
-                {
-                    int num2 = Convert.ToInt32(Source.Substring(i * 2, 2), 0x10);
-                    buffer[i] = (byte)num2;
-                }
-                MemoryStream stream = new MemoryStream();
-                CryptoStream stream2 = new CryptoStream(stream, provider.CreateDecryptor(), CryptoStreamMode.Write);
-                stream2.Write(buffer, 0, buffer.Length);
-                stream2.FlushFinalBlock();
-                stream.Close();
-                return Encoding.GetEncoding("GB2312").GetString(stream.ToArray());
-            }
-            catch
-            {
-                return refValue;
-            }
-        }
-        #endregion
-        
-        #region json转list
-        /// <summary>
-        /// json转list
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="jsonValue"></param>
-        /// <returns></returns>
-        public static List<T> JsonToList<T>(string jsonValue)
-        {
-            try
-            {
-                List<T> list = new List<T>(); ;
-
-                var ja = JArray.Parse(jsonValue);
-
-                foreach (var jo in ja)
-                {
-                    list.Add(JsonToModel<T>(jo.ToString()));
-                }
-                return list;
-            }
-            catch
-            {
-                return new List<T>();
-            }
-        }
-        #endregion
-
-        #region list 转json
-        /// <summary>
-        /// list 转json
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static string ListToJson<T>(List<T> list)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append("[");
-            try
-            {
-                foreach (var item in list)
-                {
-                    sb.Append(ModelToJson(item) + ",");
-                }
-
-                sb.Append("]").Replace(",]", "]");
-
-                return sb.ToString();
-            }
-            catch
-            {
-                return "[]";
-            }
-        }
-        #endregion
-
-        #region model转json
-        /// <summary>
-        /// 标签：2015.7.13，魏中针
-        /// 说明：model转json
-        /// </summary>
-        /// <param name="Model">实体</param>
-        /// <returns></returns>
-        public static string ModelToJson(object model)
-        {
-            try
-            {
-                return JsonConvert.SerializeObject(model).ToString();
-            }
-            catch
-            {
-                return "";
-            }
-        }
-        #endregion
-        
-        #region Json转model
-        /// <summary>
-        /// 标签：2015.7.13，魏中针
-        /// 说明：Json转model
-        /// </summary>
-        /// <typeparam name="T">实体</typeparam>
-        /// <param name="Json">json</param>
-        /// <returns></returns>
-        public static T JsonToModel<T>(string jsonValue)
-        {
-            try
-            {
-                return JsonConvert.DeserializeObject<T>(jsonValue);
-            }
-            catch
-            {
-                return default(T);
-            }
-        }
-        #endregion
-
+    
         #region ComboBoxItem选中
         /// <summary>
         /// ComboBoxItem选中
@@ -393,7 +234,7 @@ namespace Data
             list.RemoveAll(a => a.linkName == item.linkName);
             list.Add(item);
 
-            File.WriteAllText(path, EncodeGB2312(ListToJson<DataLink>(list)));
+            DataCache.Set<List<DataLink>>("AllLink", list);
         }
         #endregion
 
@@ -403,19 +244,7 @@ namespace Data
         /// </summary>
         public static void SaveConfigLinkAll(List<DataLink> list)
         {
-            if (!File.Exists(path))
-            {
-                using (var fs = File.Create(path)) { }
-            }
-            
-            foreach(var item in list.FindAll(a=>a.linkName==""))
-            {
-                list.Remove(item);
-                item.linkName = GetLinkName(item);
-                list.Add(item);
-            }
-
-            File.WriteAllText(path, EncodeGB2312(ListToJson<DataLink>(list)));
+            DataCache.Set<List<DataLink>>("AllLink", list);
         }
         #endregion
 
@@ -426,16 +255,7 @@ namespace Data
         /// <returns></returns>
         public static List<DataLink> GetConfigLink()
         {
-            try
-            {
-                var content = File.ReadAllText(path);
-                var list = JsonToList<DataLink>(DecodeGB2312(content));                
-                return list;
-            }
-            catch
-            {
-                return new List<DataLink>();
-            }
+            return DataCache.Get<List<DataLink>>("AllLink");
         }
         #endregion
 

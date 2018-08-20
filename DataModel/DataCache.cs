@@ -1,15 +1,61 @@
-﻿using System;
-using System.Web;
-using System.Web.Caching;
-using System.Collections;
+﻿using Aoite.LevelDB;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DataModel
 {
     /// <summary>
     /// 缓存操作类
     /// </summary>
-    public class DataCache
+    public static class DataCache
     {
+        private readonly static string path = string.Format("{0}Db", AppDomain.CurrentDomain.BaseDirectory);
+        private readonly static Options options = new Options { CreateIfMissing = true };
+
+        #region 转成字节流
+        /// <summary>
+        /// 转成字节流
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static byte[] ToByte(this object value)
+        {
+            using (var stream = new MemoryStream())
+            {
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(stream, value);
+                return stream.GetBuffer();
+            }
+        }
+        #endregion
+
+         #region 流转成对象
+        /// <summary>
+        /// 流转成对象
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static T ToModel<T>(this byte[] value) where T : class, new()
+        {
+            using (var stream = new MemoryStream(value))
+            {
+                var formatter = new BinaryFormatter();
+                return formatter.Deserialize(stream) as T;
+            }
+        }
+
+        public static object ToModel(this byte[] value)
+        {
+            using (var stream = new MemoryStream(value))
+            {
+                var formatter = new BinaryFormatter();
+                return formatter.Deserialize(stream);
+            }
+        }
+        #endregion
+
         #region 获取值
         /// <summary>
         /// 获取值
@@ -17,25 +63,23 @@ namespace DataModel
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static T Get<T>(string key) where T : new() 
+        /// <summary>
+        /// get value
+        /// </summary>
+        public static T Get<T>(string key) where T : class, new()
         {
-            try
+            using (var db = new LDB(path))
             {
-                var result = new T();
-                
-                object obj = HttpRuntime.Cache.Get(key);
-                if (obj != null)
-                    result = (T)((object)obj);
+                var item = db.Get(key);
 
-                return result;
-            }
-            catch
-            {
-                return new T();
+                if (item == null)
+                    return new T();
+                else
+                    return db.Get(key).ByteArray.ToModel<T>();
             }
         }
         #endregion
-        
+
         #region 设置值
         /// <summary>
         /// 设置值
@@ -45,14 +89,11 @@ namespace DataModel
         /// <param name="Value"></param>
         /// <param name="Seconds"></param>
         /// <returns></returns>
-        public static void Set<T>(string Name, T Value, int Hours = 0)
+        public static void Set<T>(string key, T value)
         {
-            if (Value == null)
-                Clear(Name);
-            else
+            using (var db = new LDB(path))
             {
-                Clear(Name);
-                HttpRuntime.Cache.Insert(Name, Value, null, DateTime.Now.AddHours(Hours), Cache.NoSlidingExpiration);
+                db.Set(key, value.ToByte());
             }
         }
         #endregion
@@ -66,19 +107,9 @@ namespace DataModel
         /// <returns></returns>
         public static string Get(string key)
         {
-            try
+            using (var db = new LDB(path))
             {
-                var result = "";
-
-                object obj = HttpRuntime.Cache.Get(key);
-                if (obj != null)
-                    result = (string)((object)obj);
-
-                return result;
-            }
-            catch
-            {
-                return "";
+                return db.Get(key);
             }
         }
         #endregion
@@ -92,14 +123,11 @@ namespace DataModel
         /// <param name="Value"></param>
         /// <param name="Seconds"></param>
         /// <returns></returns>
-        public static void Set(string Name, string Value, int Hours = 0)
+        public static void Set(string key, string value)
         {
-            if (Value == null)
-                Clear(Name);
-            else
+            using (var db = new LDB(path))
             {
-                Clear(Name);
-                HttpRuntime.Cache.Insert(Name, Value, null, DateTime.Now.AddHours(Hours), Cache.NoSlidingExpiration);
+                db.Set(key, value);
             }
         }
         #endregion
@@ -112,7 +140,10 @@ namespace DataModel
         /// <returns></returns>
         public static bool Exists(string key)
         {
-            return HttpRuntime.Cache.Get(key) != null;
+            using (var db = new LDB(path))
+            {
+                return db.Get(key) == null;
+            }
         }
         #endregion
 
@@ -123,27 +154,9 @@ namespace DataModel
         /// <param name="Name"></param>
         public static void Clear(string key)
         {
-            HttpRuntime.Cache.Remove(key);
-        }
-        #endregion
-
-        #region 清楚所有缓存
-        /// <summary>
-        /// 清楚所有缓存
-        /// </summary>
-        public static void ClearAll()
-        {
-            var list = new ArrayList();
-            var cacheEnum = HttpRuntime.Cache.GetEnumerator();
-
-            while (cacheEnum.MoveNext())
+            using (var db = new LDB(path))
             {
-                list.Add(cacheEnum.Key);
-            }
-
-            foreach (string key in list)
-            {
-                HttpRuntime.Cache.Remove(key);
+                db.Remove(key);
             }
         }
         #endregion

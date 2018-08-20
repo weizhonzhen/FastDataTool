@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Threading;
 using DataModel;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace Data
 {
@@ -108,7 +106,8 @@ namespace Data
             Dcolumn.DataContext = "";
             if (DataSchema.CheckLink(AppCache.GetBuildLink().dbType, AppCache.GetBuildLink().connStr))
             {
-                AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>());
+                if (!AppCache.ExistsTable())
+                    AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>());
                 Dtable.DataContext = AppCache.GetTableList();
             }
             else
@@ -127,8 +126,9 @@ namespace Data
             Dcolumn.DataContext = "";
             if (DataSchema.CheckLink(AppCache.GetBuildLink().dbType, AppCache.GetBuildLink().connStr))
             {
-                AppCache.SetTableList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>());
-                Dtable.DataContext = AppCache.GetTableList();
+                if (!AppCache.ExistsView())
+                    AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>());
+                Dtable.DataContext = AppCache.GetViewList();
             }
             else
                 CodeBox.Show("连接数据库失败", this);
@@ -208,6 +208,7 @@ namespace Data
                     entiy.isCheck = (bool)isCheck.IsChecked;
                     entiy.isMap = (bool)isMap.IsChecked;
                     entiy.isModel = (bool)isModel.IsChecked;
+                    entiy.isOldModel = (bool)isOldModel.IsChecked;
 
                     if (DataDbType.Oracle == AppCache.GetBuildLink().dbType)
                         entiy.param = ":";
@@ -218,7 +219,7 @@ namespace Data
                     if (DataDbType.SqlServer == AppCache.GetBuildLink().dbType)
                         entiy.param = "@";
 
-                    if (!entiy.isCheck && !entiy.isSerialize && !entiy.isMap && !entiy.isModel)
+                    if (!entiy.isCheck && !entiy.isSerialize && !entiy.isMap && !entiy.isModel&&!entiy.isOldModel)
                     {
                         CodeBox.Show("请选择模板", this);
                         return;
@@ -685,19 +686,6 @@ namespace Data
         {
             this.Hide();
             e.Cancel = true;
-        }
-        #endregion
-
-        #region 加密 / 解密
-        /// <summary>
-        /// 加密 / 解密
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DeEn_Click(object sender, RoutedEventArgs e)
-        {
-            var from = new DeEnFrom();
-            Common.OpenWin(from, this);
         }
         #endregion
     }

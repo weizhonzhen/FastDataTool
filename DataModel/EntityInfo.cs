@@ -31,9 +31,14 @@ namespace DataModel
         public bool isCheck { get; set; }
 
         /// <summary>
-        /// 是否map
+        /// 是否model
         /// </summary>
         public bool isModel { get; set; }
+
+        /// <summary>
+        /// 是否old model
+        /// </summary>
+        public bool isOldModel { get; set; }
 
         /// <summary>
         /// 是否表单
@@ -98,7 +103,7 @@ namespace DataModel
                 if (item.colType == "decimal" || item.colType == "byte" || item.colType == "short" || item.colType == "int"
                                 || item.colType == "TimeSpan" || item.colType == "long" || item.colType == "float" || item.colType == "double"
                                 || item.colType == "bool" || item.colType == "DateTime" || item.colType == "Guid")
-                    item.showNull = "?";
+                    item.showNull = "?";                
                 else
                     item.showNull = "";
 

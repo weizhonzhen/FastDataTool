@@ -15,6 +15,15 @@ namespace <#=entity.nameSpace#>
 	/// </summary>
     public class <#=entity.table.tabName#>
     {
+		public <#=entity.table.tabName#>(){}
+		<#
+        foreach(var c in entity.columns)
+        {
+#>
+		public <#=c.colType#><#=c.showNull#> _<#=c.colName#>;
+<#
+		}
+#> 
 <#
         foreach(var c in entity.columns)
         {
@@ -23,7 +32,11 @@ namespace <#=entity.nameSpace#>
         /// <summary>
  	    /// <#=c.colComments#>
 	    /// </summary>
-		public <#=c.colType#><#=c.showNull#> <#=c.colName#>{ get; set; }
+		public <#=c.colType#><#=c.showNull#> <#=c.colName#>
+		{ 
+			set{_<#=c.colName#>=value;}
+			get{return _<#=c.colName#>;} 
+		}
 <#
 		}
 #>      
