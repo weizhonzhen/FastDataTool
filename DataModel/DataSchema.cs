@@ -217,7 +217,7 @@ namespace DataModel
         {
             try
             {
-                var key = string.Format("{0}_{1}_{2}_{3}", link.dbType, tableName, link.serverName, link.hostName);
+                var key = string.Format("{0}_{1}_{2}", link.dbType, tableName, link.hostName);
                 if (AppCache.ExistsTableColumn(key))
                     return AppCache.GetTableColumn(key);
 
