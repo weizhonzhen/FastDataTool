@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using DataModel;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Data
 {
@@ -103,15 +104,9 @@ namespace Data
         /// <param name="e"></param>
         private void Show_Table(object sender, RoutedEventArgs e)
         {
-            Dcolumn.DataContext = "";
-            if (DataSchema.CheckLink(AppCache.GetBuildLink().dbType, AppCache.GetBuildLink().connStr))
-            {
-                if (!AppCache.ExistsTable())
-                    AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>());
-                Dtable.DataContext = AppCache.GetTableList();
-            }
-            else
-                CodeBox.Show("连接数据库失败",this);
+            if (!AppCache.ExistsTable(AppCache.GetBuildLink()))
+                AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
         }
         #endregion
 
@@ -123,15 +118,9 @@ namespace Data
         /// <param name="e"></param>
         private void Show_View(object sender, RoutedEventArgs e)
         {
-            Dcolumn.DataContext = "";
-            if (DataSchema.CheckLink(AppCache.GetBuildLink().dbType, AppCache.GetBuildLink().connStr))
-            {
-                if (!AppCache.ExistsView())
-                    AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>());
-                Dtable.DataContext = AppCache.GetViewList();
-            }
-            else
-                CodeBox.Show("连接数据库失败", this);
+            if (!AppCache.ExistsView(AppCache.GetBuildLink()))
+                AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
 
@@ -504,7 +493,17 @@ namespace Data
         /// <param name="e"></param>
         private void Dtable_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            DataSchema.UpdateTabComments(e.Row.Item as BaseTable, AppCache.GetBuildLink());
+            var list = AppCache.GetTableList(AppCache.GetBuildLink());
+            var item = e.Row.Item as BaseTable;
+            var temp= list.Find(a => a.tabName == item.tabName);
+            list.Remove(temp);
+            list.Add(item);
+            AppCache.SetTableList(list, AppCache.GetBuildLink());
+
+            Task.Factory.StartNew(() =>
+            {
+                DataSchema.UpdateTabComments(e.Row.Item as BaseTable, AppCache.GetBuildLink());
+            });
         }
         #endregion
 
@@ -673,7 +672,23 @@ namespace Data
         /// <param name="e"></param>
         private void Dcolumn_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            DataSchema.UpdateColComments(e.Row.Item as BaseColumn, Dtable.SelectedItem as BaseTable, AppCache.GetBuildLink());
+            var table = Dtable.SelectedItem as BaseTable;
+
+            if (table != null)
+            {
+                var list = DataSchema.ColumnList(AppCache.GetBuildLink(), table.tabName) ?? new List<BaseColumn>();
+                var item = e.Row.Item as BaseColumn;
+
+                var temp = list.Find(a => a.colId == item.colId);
+                list.Remove(temp);
+                list.Add(item);
+                AppCache.SetTableColumn(list, DataSchema.GetColumnKey(AppCache.GetBuildLink(), table.tabName));
+            }
+
+            Task.Factory.StartNew(() =>
+            {
+                DataSchema.UpdateColComments(e.Row.Item as BaseColumn, Dtable.SelectedItem as BaseTable, AppCache.GetBuildLink());
+            });
         }
         #endregion
                 
