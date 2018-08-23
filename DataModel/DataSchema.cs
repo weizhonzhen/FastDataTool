@@ -14,7 +14,18 @@ namespace DataModel
     /// 表结构
     /// </summary>
     public class DataSchema
-    {        
+    {
+        #region 列缓存键
+        /// <summary>
+        /// 列缓存键
+        /// </summary>
+        /// <returns></returns>
+        public static string GetColumnKey(DataLink link,string tableName)
+        {
+            return string.Format("{0}_{1}_{2}", link.dbType, tableName, link.hostName);
+        }
+        #endregion
+
         #region 获取表说明
         /// <summary>
         /// 获取表说明
@@ -217,7 +228,7 @@ namespace DataModel
         {
             try
             {
-                var key = string.Format("{0}_{1}_{2}", link.dbType, tableName, link.hostName);
+                var key = GetColumnKey(link, tableName);
                 if (AppCache.ExistsTableColumn(key))
                     return AppCache.GetTableColumn(key);
 
