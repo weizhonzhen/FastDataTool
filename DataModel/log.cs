@@ -14,6 +14,9 @@ namespace DataModel
         /// <param name="content"></param>
         public static void SaveLog(string content,string fileName)
         {
+            if (!Directory.Exists(string.Format("{0}log", AppDomain.CurrentDomain.BaseDirectory)))
+                Directory.CreateDirectory(string.Format("{0}log", AppDomain.CurrentDomain.BaseDirectory));
+
             var path = string.Format("{0}log\\{1}_{2}.txt", AppDomain.CurrentDomain.BaseDirectory, fileName, DateTime.Now.ToString("yyyy-MM"));
 
             lock (obj)

@@ -68,10 +68,7 @@
   <ItemGroup>
     <Compile Include="AppCache.cs" />
     <Compile Include="DataCache.cs" />
-    <Compile Include="DataCreate.cs" />
-    <Compile Include="DataDbLink.cs" />
     <Compile Include="DataDbType.cs" />
-    <Compile Include="DataQuery.cs" />
     <Compile Include="DataSchema.cs" />
     <Compile Include="log.cs" />
     <Compile Include="Model.cs" />

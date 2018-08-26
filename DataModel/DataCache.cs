@@ -31,7 +31,7 @@ namespace DataModel
         }
         #endregion
 
-         #region 流转成对象
+        #region 流转成对象
         /// <summary>
         /// 流转成对象
         /// </summary>
@@ -157,7 +157,7 @@ namespace DataModel
         /// 清空
         /// </summary>
         /// <param name="Name"></param>
-        public static void Clear(string key)
+        public static void Remove(string key)
         {
             CheckPath();
             using (var db = new LDB(path))
