@@ -110,6 +110,19 @@ namespace FastDataTool
         }
         #endregion
 
+        #region 更新表结构
+        /// <summary>
+        /// 更新表结构
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ReLoad_Table(object sender, RoutedEventArgs e)
+        {
+            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
+        }
+        #endregion
+
         #region 显示视图结构
         /// <summary>
         /// 显示视图结构
@@ -120,6 +133,19 @@ namespace FastDataTool
         {
             if (!AppCache.ExistsView(AppCache.GetBuildLink()))
                 AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
+        }
+        #endregion
+        
+        #region 更新视图结构
+        /// <summary>
+        /// 更新视图结构
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ReLoad_View(object sender, RoutedEventArgs e)
+        {
+            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
