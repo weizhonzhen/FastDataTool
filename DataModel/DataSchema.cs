@@ -20,7 +20,7 @@ namespace DataModel
         /// 列缓存键
         /// </summary>
         /// <returns></returns>
-        public static string GetColumnKey(DataLink link,string tableName)
+        public static string GetColumnKey(DataLink link, string tableName)
         {
             return string.Format("{0}_{1}_{2}", link.dbType, tableName, link.hostName);
         }
@@ -33,7 +33,7 @@ namespace DataModel
         /// <param name="dbType">数据库类型</param>
         /// <param name="strConn">连接串</param>
         /// <returns></returns>
-        public static List<BaseTable> TableList(DataLink link,string tableName="")
+        public static List<BaseTable> TableList(DataLink link, string tableName = "", bool isUpdate = false)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace DataModel
                         var cmd = conn.CreateCommand();
                         cmd.CommandText = string.Format("select name,(select top 1 value from sys.extended_properties where major_id=object_id(a.name) and minor_id=0) as value from sys.objects a where type='U' {0}"
                                                 , (String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and name='{0}'", tableName)));
-                        
+
                         var rd = cmd.ExecuteReader();
                         dt.Load(rd);
                         conn.Close();
@@ -77,15 +77,15 @@ namespace DataModel
                 }
 
                 //mysql 表信息
-                if(link.dbType==DataDbType.MySql)
+                if (link.dbType == DataDbType.MySql)
                 {
                     #region mysql
-                    using(var conn=new MySqlConnection(link.connStr))
+                    using (var conn = new MySqlConnection(link.connStr))
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
                         cmd.CommandText = string.Format("select table_name, table_comment from information_schema.TABLES where table_schema='{0}'{1} and table_type='BASE TABLE'"
-                                                        ,link.serverValue, String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and name='{0}'", tableName));
+                                                        , link.serverValue, String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and name='{0}'", tableName));
 
                         var rd = cmd.ExecuteReader();
                         dt.Load(rd);
@@ -106,13 +106,13 @@ namespace DataModel
                     //预先加载列信息
                     if (tableName == "loadColumnList")
                     {
-                       taskList.Add(Task.Factory.StartNew(() =>
+                        taskList.Add(Task.Factory.StartNew(() =>
                         {
-                            ColumnList(link, table.tabName);
+                            ColumnList(link, table.tabName, isUpdate);
                         }));
                     }
                 }
-                
+
                 Task.WaitAll(taskList.ToArray());
                 return list;
             }
@@ -130,7 +130,7 @@ namespace DataModel
         /// <param name="dbType">数据库类型</param>
         /// <param name="strConn">连接串</param>
         /// <returns></returns>
-        public static List<BaseTable> ViewList(DataLink link, string tableName = "")
+        public static List<BaseTable> ViewList(DataLink link, string tableName = "", bool isUpdate = false)
         {
             try
             {
@@ -201,7 +201,7 @@ namespace DataModel
                     {
                         taskList.Add(Task.Factory.StartNew(() =>
                         {
-                            ColumnList(link, table.tabName);
+                            ColumnList(link, table.tabName, isUpdate);
                         }));
                     }
                 }
@@ -215,7 +215,7 @@ namespace DataModel
             }
         }
         #endregion
-        
+
         #region 获取列的信息
         /// <summary>
         /// 获取列的信息
@@ -224,12 +224,12 @@ namespace DataModel
         /// <param name="strConn">连接串</param>
         /// <param name="tableName">表名</param>
         /// <returns></returns>
-        public static List<BaseColumn> ColumnList(DataLink link,string tableName)
+        public static List<BaseColumn> ColumnList(DataLink link, string tableName, bool isUpdate = false)
         {
             try
             {
                 var key = GetColumnKey(link, tableName);
-                if (AppCache.ExistsTableColumn(key))
+                if (AppCache.ExistsTableColumn(key) && !isUpdate)
                     return AppCache.GetTableColumn(key);
 
                 var list = new List<BaseColumn>();
@@ -316,23 +316,23 @@ namespace DataModel
                     column.colComments = item.ItemArray[3] == DBNull.Value ? "" : item.ItemArray[3].ToString();
                     column.isKey = item.ItemArray[4].ToString() != "0" ? true : false;
                     column.isNull = (item.ItemArray[6].ToString().ToUpper().Trim() == "Y" || item.ItemArray[6].ToString().ToUpper().Trim() == "YES" || item.ItemArray[6].ToString().ToUpper().Trim() == "1") ? "是" : "否";
-                    
+
                     column.precision = item.ItemArray[7] == DBNull.Value ? 0 : int.Parse(item.ItemArray[7].ToString());
                     column.scale = item.ItemArray[8] == DBNull.Value ? 0 : int.Parse(item.ItemArray[8].ToString());
                     column.isIndex = item.ItemArray[5].ToString() != "0" ? true : false;
 
-                    if(link.dbType==DataDbType.MySql)
+                    if (link.dbType == DataDbType.MySql)
                         column.showType = item.ItemArray[9] == DBNull.Value ? GetShowColType(column) : item.ItemArray[9].ToString();
                     else
                         column.showType = GetShowColType(column);
 
                     column.showColName = string.Format("{0}{1}{2}", column.isKey ? "(主键) " : "", column.isIndex ? "(索引) " : "", column.colName);
                     column.showTypeColName = string.Format("{0}  [{1}]", column.colName, column.showType);
-                    
-                    list.Add(column);                    
+
+                    list.Add(column);
                 }
 
-                AppCache.SetTableColumn(list,key);
+                AppCache.SetTableColumn(list, key);
                 return list;
             }
             catch
@@ -375,8 +375,8 @@ namespace DataModel
         /// </summary>
         /// <param name="dbType">数据库类型</param>
         /// <param name="dbConn">连接串</param>
-        public static bool CheckLink(string dbType,string dbConn)
-        {  
+        public static bool CheckLink(string dbType, string dbConn)
+        {
             try
             {
                 var refValue = false;
@@ -407,14 +407,14 @@ namespace DataModel
                             conn.Open();
                             return true;
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             return false;
                         }
                     }
                     #endregion
                 }
-                else if(dbType==DataDbType.MySql)
+                else if (dbType == DataDbType.MySql)
                 {
                     #region mysql
                     using (var conn = new MySqlConnection(dbConn))
@@ -445,7 +445,7 @@ namespace DataModel
         /// <summary>
         /// 修改表说明
         /// </summary>
-        public static void UpdateTabComments(BaseTable item,DataLink link)
+        public static void UpdateTabComments(BaseTable item, DataLink link)
         {
             try
             {
@@ -455,13 +455,13 @@ namespace DataModel
                 if (link.dbType == DataDbType.SqlServer)
                 {
                     #region sqlserver
-                    sql.AppendFormat(@"exec sys.sp_updateextendedproperty N'MS_Description',N'{0}',N'SCHEMA', N'dbo', N'TABLE',N'{1}'" , item.tabComments, item.tabName);
+                    sql.AppendFormat(@"exec sys.sp_updateextendedproperty N'MS_Description',N'{0}',N'SCHEMA', N'dbo', N'TABLE',N'{1}'", item.tabComments, item.tabName);
 
                     using (var conn = new SqlConnection(link.connStr))
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("select count(0) from sys.extended_properties where object_id('{0}')=major_id and minor_id=0", item.tabName);                        
+                        cmd.CommandText = string.Format("select count(0) from sys.extended_properties where object_id('{0}')=major_id and minor_id=0", item.tabName);
                         var rd = cmd.ExecuteReader();
                         dt.Load(rd);
 
@@ -486,7 +486,7 @@ namespace DataModel
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("Comment on table {0} is '{1}'", item.tabName, item.tabComments);                        
+                        cmd.CommandText = string.Format("Comment on table {0} is '{1}'", item.tabName, item.tabComments);
                         cmd.ExecuteNonQuery();
                         conn.Close();
                     }
@@ -499,14 +499,15 @@ namespace DataModel
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("alter table {0} comment '{1}'", item.tabName, item.tabComments);                        
+                        cmd.CommandText = string.Format("alter table {0} comment '{1}'", item.tabName, item.tabComments);
                         cmd.ExecuteNonQuery();
                         conn.Close();
                     }
                     #endregion
                 }
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 log.SaveLog(ex.ToString(), "UpdateTabComments");
             }
         }
@@ -516,7 +517,7 @@ namespace DataModel
         /// <summary>
         /// 修改列说明
         /// </summary>
-        public static void UpdateColComments(BaseColumn colItem,BaseTable tabItem,DataLink link)
+        public static void UpdateColComments(BaseColumn colItem, BaseTable tabItem, DataLink link)
         {
             try
             {
@@ -526,15 +527,15 @@ namespace DataModel
                 {
                     #region sqlserver
                     sql.AppendFormat(@"exec sys.sp_updateextendedproperty N'MS_Description',N'{0}',N'SCHEMA', N'dbo', N'TABLE',N'{1}',N'column',N'{2}'"
-                                         , colItem.colComments,tabItem.tabName, colItem.colName);
+                                         , colItem.colComments, tabItem.tabName, colItem.colName);
 
                     using (var conn = new SqlConnection(link.connStr))
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText =string.Format(@"select count(0) from syscolumns where id = object_id('{0}') and name='{1}'
+                        cmd.CommandText = string.Format(@"select count(0) from syscolumns where id = object_id('{0}') and name='{1}'
                                                         and exists(select 1 from sys.extended_properties where object_id('{0}')=major_id and colid=minor_id)"
-                                                        ,tabItem.tabName,colItem.colName);
+                                                        , tabItem.tabName, colItem.colName);
                         var rd = cmd.ExecuteReader();
                         dt.Load(rd);
 
@@ -559,7 +560,7 @@ namespace DataModel
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("Comment on column {0}.{1} is '{2}'", tabItem.tabName, colItem.colName, colItem.colComments);                        
+                        cmd.CommandText = string.Format("Comment on column {0}.{1} is '{2}'", tabItem.tabName, colItem.colName, colItem.colComments);
                         cmd.ExecuteNonQuery();
                         conn.Close();
                     }
@@ -574,20 +575,19 @@ namespace DataModel
                         var cmd = conn.CreateCommand();
                         if (colItem.isKey)
                             cmd.CommandText = string.Format("update columns set column_comment ='{0}' where table_schema='{1}' and table_name='{2}' and clumn_name='{3}'"
-                                                            , colItem.colComments,link.serverValue,tabItem.tabName,colItem.colComments);
+                                                            , colItem.colComments, link.serverValue, tabItem.tabName, colItem.colComments);
                         else
                             cmd.CommandText = string.Format("alter table {0} modify {1} {2} comment '{3}'"
                                                             , tabItem.tabName, colItem.colName, colItem.showType, colItem.colComments);
-                        
+
                         cmd.ExecuteNonQuery();
                         conn.Close();
                     }
                     #endregion
                 }
             }
-            catch (Exception ex){ log.SaveLog(ex.ToString(), "UpdateColComments"); }
+            catch (Exception ex) { log.SaveLog(ex.ToString(), "UpdateColComments"); }
         }
         #endregion
-
     }
 }

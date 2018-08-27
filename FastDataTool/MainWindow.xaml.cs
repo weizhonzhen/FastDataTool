@@ -118,7 +118,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void ReLoad_Table(object sender, RoutedEventArgs e)
         {
-            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList",true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
         }
         #endregion
@@ -145,7 +145,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void ReLoad_View(object sender, RoutedEventArgs e)
         {
-            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList",true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
