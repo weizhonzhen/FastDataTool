@@ -107,9 +107,9 @@ namespace DataModel
                     if (tableName == "loadColumnList")
                     {
                         taskList.Add(Task.Factory.StartNew(() =>
-                        {
-                            ColumnList(link, table.tabName, isUpdate);
-                        }));
+                         {
+                             ColumnList(link, table.tabName, isUpdate);
+                         }));
                     }
                 }
 
@@ -232,6 +232,10 @@ namespace DataModel
                 if (AppCache.ExistsTableColumn(key) && !isUpdate)
                     return AppCache.GetTableColumn(key);
 
+                //非联机
+                if (!AppCache.GetLineState(link))
+                    return new List<BaseColumn>();
+
                 var list = new List<BaseColumn>();
                 var dt = new DataTable();
 
@@ -332,11 +336,13 @@ namespace DataModel
                     list.Add(column);
                 }
 
+                AppCache.SetOnLine(link);
                 AppCache.SetTableColumn(list, key);
                 return list;
             }
             catch
             {
+                AppCache.SetOffLine(link);
                 return new List<BaseColumn>();
             }
         }
@@ -589,5 +595,82 @@ namespace DataModel
             catch (Exception ex) { log.SaveLog(ex.ToString(), "UpdateColComments"); }
         }
         #endregion
+
+        #region 获取表名、条数、大小
+        /// <summary>
+        /// 获取表名、条数、大小
+        /// </summary>
+        /// <param name="dbType"></param>
+        /// <param name="connStr"></param>
+        /// <returns></returns>
+        public static List<SoureTable> GetSourceTable(DataLink link)
+        {
+            try
+            {
+                var list = new List<SoureTable>();
+                var ds = new DataSet();
+
+                if (link.dbType == DataDbType.SqlServer)
+                {
+                    #region sqlserver
+                    using (var conn = new SqlConnection(link.connStr))
+                    {
+                        var cmd = conn.CreateCommand();
+                        cmd.CommandText = "exec sp_MSforeachtable \"exec sp_spaceused '?',true\" ";
+                        var sda = new SqlDataAdapter(cmd);
+                        sda.Fill(ds);
+
+                        foreach (DataTable dt in ds.Tables)
+                        {
+                            foreach (DataRow dr in dt.Rows)
+                            {
+                                var item = new SoureTable();
+                                item.tabName = dr.ItemArray[0].ToString().Trim();
+                                item.tabCount = long.Parse(dr.ItemArray[1].ToString().Trim());
+                                item.tabSize = decimal.Parse((decimal.Parse(dr.ItemArray[3].ToString().Replace("KB", "").Trim()) / 1024).ToString("#0.00"));
+                                list.Add(item);
+                            }
+                        }
+                        conn.Close();
+                    }
+                    #endregion
+                }
+                else if (link.dbType == DataDbType.Oracle)
+                {
+                    #region oracle
+                    using (var conn = new OracleConnection(link.connStr))
+                    {
+                        var cmd = conn.CreateCommand();
+                        cmd.CommandText = "select table_name,num_rows,(SELECT BYTES FROM user_segments WHERE segment_name=user_tables.table_name and rownum=1) FROM user_tables";
+                        var oda = new OracleDataAdapter(cmd);
+                        oda.Fill(ds);
+
+                        foreach (DataTable dt in ds.Tables)
+                        {
+                            foreach (DataRow dr in dt.Rows)
+                            {
+                                var item = new SoureTable();
+                                item.tabName = dr.ItemArray[0].ToString().Trim();
+                                item.tabCount = long.Parse(dr.ItemArray[1] == DBNull.Value ? "0" : dr.ItemArray[1].ToString());
+                                if (!String.IsNullOrEmpty(dr.ItemArray[2].ToString().Trim()))
+                                    item.tabSize = decimal.Parse((decimal.Parse(dr.ItemArray[2].ToString().Trim()) / 1024 / 1024).ToString("#0.00"));
+                                else
+                                    item.tabSize = 0;
+                                list.Add(item);
+                            }
+                        }
+                        conn.Close();
+                    }
+                    #endregion
+                }
+
+                return list;
+            }
+            catch
+            {
+                return new List<SoureTable>();
+            }
+        }
+        #endregion        
     }
 }
