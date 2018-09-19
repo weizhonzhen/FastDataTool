@@ -232,9 +232,13 @@ namespace DataModel
                 if (AppCache.ExistsTableColumn(key) && !isUpdate)
                     return AppCache.GetTableColumn(key);
 
-                //非联机
+                //脱机
                 if (!AppCache.GetLineState(link))
-                    return new List<BaseColumn>();
+                {
+                    var templist = new List<BaseColumn>();
+                    templist.Add(new BaseColumn { colName = "数据库脱机" });
+                    return templist;
+                }
 
                 var list = new List<BaseColumn>();
                 var dt = new DataTable();

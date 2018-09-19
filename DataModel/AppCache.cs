@@ -92,13 +92,13 @@ namespace DataModel
         public static bool GetLineState(DataLink link) { return DataCache.Exists(GetLinkKey(link)); }
 
         /// <summary>
-        /// 上线
+        /// 联机
         /// </summary>
         /// <param name="link"></param>
         public static void SetOnLine(DataLink link) { DataCache.Set(GetLinkKey(link), ""); }
         
         /// <summary>
-        /// 下线
+        /// 脱机
         /// </summary>
         /// <param name="link"></param>
         public static void SetOffLine(DataLink link) { DataCache.Clear(GetLinkKey(link)); }
