@@ -106,14 +106,10 @@ namespace DataModel
                     //预先加载列信息
                     if (tableName == "loadColumnList")
                     {
-                        taskList.Add(Task.Factory.StartNew(() =>
-                         {
-                             ColumnList(link, table.tabName, isUpdate);
-                         }));
+                        ColumnList(link, table.tabName, isUpdate);
                     }
                 }
 
-                Task.WaitAll(taskList.ToArray());
                 return list;
             }
             catch

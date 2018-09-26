@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using DataModel;
 
-namespace FastDataTool
+namespace Data
 {
     /// <summary>
     /// SetLink.xaml 的交互逻辑
@@ -42,9 +42,9 @@ namespace FastDataTool
             dbConn = Common.GetConnStr(dbType, txtUserName, txtPwd, txtHostName, txtPort, txtServerName);
 
             if (DataSchema.CheckLink(dbType, dbConn))
-                CodeBox.Show("连接成功！",this);
+                CodeBox.Show("连接成功！", this);
             else
-                CodeBox.Show("连接失败！",this);
+                CodeBox.Show("连接失败！", this);
         }
         #endregion        
 
@@ -98,7 +98,7 @@ namespace FastDataTool
                 AppCache.SetBuildLink(buildLink);
                 this.Owner.Title = string.Format("数据工具-{0}", txtLinkName.Text);
                 AppCache.SetTitle(this.Owner.Title);
-                
+                AppCache.SetOnLine(buildLink);
                 this.Close();
             }
         }
@@ -132,7 +132,7 @@ namespace FastDataTool
                 Common.SaveConfigLinkAll(list);
 
                 dbTypeLink.ItemsSource = list;
-                DataCache.Remove("buildLink");
+                DataCache.Clear("buildLink");
                 InitLinkInfo();
             }
         }
