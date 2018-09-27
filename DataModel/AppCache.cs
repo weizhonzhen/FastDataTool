@@ -34,7 +34,7 @@ namespace DataModel
 
         //视图list
         public static List<BaseTable> GetViewList(DataLink link) { return DataCache.Get<List<BaseTable>>(GetViewKey(link)) ?? new List<BaseTable>(); }
-        public static void SetViewList(List<BaseTable> item, DataLink link) { DataCache.Set<List<BaseTable>>("viewList", item); }
+        public static void SetViewList(List<BaseTable> item, DataLink link) { DataCache.Set<List<BaseTable>>(GetViewKey(link), item); }
         public static bool ExistsView(DataLink link) { return DataCache.Exists(GetViewKey(link)); }
 
         //表列list
