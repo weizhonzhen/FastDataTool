@@ -95,7 +95,6 @@ namespace DataModel
                     #endregion
                 }
 
-                var taskList = new List<Task>();
                 foreach (DataRow item in dt.Rows)
                 {
                     var table = new BaseTable();
@@ -184,7 +183,6 @@ namespace DataModel
                     #endregion
                 }
 
-                var taskList = new List<Task>();
                 foreach (DataRow item in dt.Rows)
                 {
                     var table = new BaseTable();
@@ -195,14 +193,9 @@ namespace DataModel
                     //预先加载列信息
                     if (tableName == "loadColumnList")
                     {
-                        taskList.Add(Task.Factory.StartNew(() =>
-                        {
-                            ColumnList(link, table.tabName, isUpdate);
-                        }));
+                        ColumnList(link, table.tabName, isUpdate);
                     }
                 }
-
-                Task.WaitAll(taskList.ToArray());
                 return list;
             }
             catch
