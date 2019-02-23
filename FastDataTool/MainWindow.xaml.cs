@@ -6,6 +6,7 @@ using DataModel;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace FastDataTool
 {
@@ -19,7 +20,7 @@ namespace FastDataTool
 
         //成功、失败数量
         public int success = 0, total = 0, colNext = 0, tabNext = 0;
-        
+
         #region 加载
         /// <summary>
         /// 加载
@@ -39,7 +40,7 @@ namespace FastDataTool
             notifyIcon.Visible = true;
 
             //打开菜单项
-            var open = new System.Windows.Forms.MenuItem(string.Format("打开{0}",AppCache.GetTitle()));
+            var open = new System.Windows.Forms.MenuItem(string.Format("打开{0}", AppCache.GetTitle()));
             open.Click += new EventHandler(Show);
 
             //退出菜单项
@@ -118,7 +119,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void ReLoad_Table(object sender, RoutedEventArgs e)
         {
-            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList",true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList", true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
         }
         #endregion
@@ -132,11 +133,11 @@ namespace FastDataTool
         private void Show_View(object sender, RoutedEventArgs e)
         {
             if (!AppCache.ExistsView(AppCache.GetBuildLink()))
-                AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+                AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList", true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
-        
+
         #region 更新视图结构
         /// <summary>
         /// 更新视图结构
@@ -145,7 +146,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void ReLoad_View(object sender, RoutedEventArgs e)
         {
-            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList",true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
@@ -161,7 +162,7 @@ namespace FastDataTool
             Common.CheckAllBox((sender as System.Windows.Controls.CheckBox), Dtable, "tabBox");
         }
         #endregion
-        
+
         #region 列CheckBox 全选
         /// <summary>
         /// 列CheckBox 全选
@@ -183,7 +184,7 @@ namespace FastDataTool
         private void Dtable_Selected(object sender, RoutedEventArgs e)
         {
             var item = (sender as System.Windows.Controls.DataGrid).SelectedItem as BaseTable;
-            
+
             if (item != null)
             {
                 //列checkbox全选为不选择
@@ -234,7 +235,7 @@ namespace FastDataTool
                     if (DataDbType.SqlServer == AppCache.GetBuildLink().dbType)
                         entiy.param = "@";
 
-                    if (!entiy.isCheck && !entiy.isSerialize && !entiy.isMap && !entiy.isModel&&!entiy.isOldModel)
+                    if (!entiy.isCheck && !entiy.isSerialize && !entiy.isMap && !entiy.isModel && !entiy.isOldModel)
                     {
                         CodeBox.Show("请选择模板", this);
                         return;
@@ -273,14 +274,14 @@ namespace FastDataTool
             CodeBox.Show(string.Format("生成完成"), this);
         }
         #endregion
-        
+
         #region  选择目录
         /// <summary>
         /// 选择目录
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Chang_Directory(object sender, RoutedEventArgs e)
         {
             txtFile = Common.FolderBrowserDialog();
         }
@@ -292,7 +293,7 @@ namespace FastDataTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Button_Change_Database(object sender, RoutedEventArgs e)
+        private void Change_Database(object sender, RoutedEventArgs e)
         {
             Common.OpenWin(new SetLink(), this);
         }
@@ -304,13 +305,13 @@ namespace FastDataTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Button_Query_Table(object sender, RoutedEventArgs e)
+        private void Query_Table(object sender, RoutedEventArgs e)
         {
             var i = 0;
             tabNext = 0;
 
             if (Dtable.SelectedIndex != -1)
-                Common.GetDataGridRow(Dtable, Dtable.SelectedIndex, false);           
+                Common.GetDataGridRow(Dtable, Dtable.SelectedIndex, false);
 
             foreach (var temp in Dtable.Items)
             {
@@ -323,7 +324,7 @@ namespace FastDataTool
                         tabNext = 1;
                         Common.GetDataGridRow(Dtable, i);
                         Dtable.ScrollIntoView(temp);
-                        Dtable.Focus();                   
+                        Dtable.Focus();
                         break;
                     }
                     else
@@ -341,7 +342,7 @@ namespace FastDataTool
                         break;
                     }
                     else
-                        Common.GetDataGridRow(Dtable, i,false);
+                        Common.GetDataGridRow(Dtable, i, false);
                 }
                 i++;
             }
@@ -407,7 +408,7 @@ namespace FastDataTool
 
                         box.IsChecked = false;
                     }
-                } 
+                }
 
                 AppCache.SetDefineSoureTable(tableList);
                 AppCache.SetDefineColumnList(columnList);
@@ -498,7 +499,8 @@ namespace FastDataTool
             }
         }
         #endregion
-        
+
+  
         #region 编辑表备注
         /// <summary>
         /// 编辑表备注
@@ -509,7 +511,7 @@ namespace FastDataTool
         {
             var list = AppCache.GetTableList(AppCache.GetBuildLink());
             var item = e.Row.Item as BaseTable;
-            var temp= list.Find(a => a.tabName == item.tabName);
+            var temp = list.Find(a => a.tabName == item.tabName);
             list.Remove(temp);
             list.Add(item);
             AppCache.SetTableList(list, AppCache.GetBuildLink());
@@ -527,7 +529,7 @@ namespace FastDataTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button_Click_2(object sender, RoutedEventArgs e)
+        private void Query_Column(object sender, RoutedEventArgs e)
         {
             var i = 0;
             colNext = 0;
@@ -539,7 +541,7 @@ namespace FastDataTool
             {
                 var item = temp as BaseColumn;
                 Dcolumn.Items.MoveCurrentToNext();
-                if (item.colName.ToLower().Contains(findColName.Text.ToLower().Trim())&&!string.IsNullOrEmpty(findColName.Text))
+                if (item.colName.ToLower().Contains(findColName.Text.ToLower().Trim()) && !string.IsNullOrEmpty(findColName.Text))
                 {
                     colNext = 1;
                     Common.GetDataGridRow(Dcolumn, i);
@@ -547,7 +549,7 @@ namespace FastDataTool
                     Dcolumn.Focus();
                     break;
                 }
-                else if(item.colComments.ToLower().Contains(findColRemark.Text.ToLower().Trim())&&!string.IsNullOrEmpty(findColRemark.Text))
+                else if (item.colComments.ToLower().Contains(findColRemark.Text.ToLower().Trim()) && !string.IsNullOrEmpty(findColRemark.Text))
                 {
                     Common.GetDataGridRow(Dcolumn, i);
                     Dcolumn.ScrollIntoView(temp);
@@ -567,7 +569,7 @@ namespace FastDataTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button2_Click(object sender, RoutedEventArgs e)
+        private void Next_Column(object sender, RoutedEventArgs e)
         {
             var count = 0;
             var i = 0;
@@ -579,7 +581,7 @@ namespace FastDataTool
             {
                 var item = temp as BaseColumn;
                 Dcolumn.Items.MoveCurrentToNext();
-                
+
                 if (item.colName.ToLower().Contains(findColName.Text.ToLower().Trim()) && !string.IsNullOrEmpty(findColName.Text))
                 {
                     count++;
@@ -621,7 +623,7 @@ namespace FastDataTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button1_Click(object sender, RoutedEventArgs e)
+        private void Next_Table(object sender, RoutedEventArgs e)
         {
             var count = 0;
             var i = 0;
@@ -633,7 +635,7 @@ namespace FastDataTool
             {
                 var item = temp as BaseTable;
                 if (!String.IsNullOrEmpty(txtTable.Text.Trim()))
-                {                    
+                {
                     Dtable.Items.MoveCurrentToNext();
                     if (item.tabName.ToLower().Contains(txtTable.Text.ToLower().Trim()))
                     {
@@ -705,7 +707,7 @@ namespace FastDataTool
             });
         }
         #endregion
-                
+
         #region 重写关闭
         /// <summary>
         /// 重写关闭
@@ -715,6 +717,63 @@ namespace FastDataTool
         {
             this.Hide();
             e.Cancel = true;
+        }
+        #endregion
+
+        #region 生成CHM
+        /// <summary>
+        /// 生成CHM
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Bulid_Chm(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var path = string.Format("{0}chm", AppDomain.CurrentDomain.BaseDirectory);
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                if (txtFile != "")
+                    path = txtFile;
+
+                //生成list
+                var list = new List<ChmModel>();
+                foreach (var item in Dtable.Items)
+                {
+                    var box = Common.GetTemplateColumn<System.Windows.Controls.CheckBox>(Dtable, 0, "tabBox", item);
+
+                    if (box != null && box.IsChecked == true)
+                    {
+                        var model = new ChmModel();
+                        model.tabComments = (item as BaseTable).tabComments;
+                        model.tabName = (item as BaseTable).tabName;
+                        model.columns = DataSchema.ColumnList(AppCache.GetBuildLink(), model.tabName) ?? new List<BaseColumn>();
+                        model.columns = model.disColType(model.columns);
+
+                        list.Add(model);
+                    }
+                }
+
+                if (list.Count == 0)
+                {
+                    CodeBox.Show("请选择要生成表", this);
+                    return;
+                }
+
+
+                Chm.CreateHhp(path);
+                Chm.CreateHhc(path, list);
+                Chm.CreateHhk(path, list);
+                Chm.Compile(path, list);
+
+                CodeBox.Show("生成成功", this);
+            }
+            catch (Exception ex)
+            {
+                CodeBox.Show("生成失败", this);
+            }
         }
         #endregion
     }

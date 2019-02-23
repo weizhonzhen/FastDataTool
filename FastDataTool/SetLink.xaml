@@ -9,7 +9,7 @@
             <ComboBoxItem Content="Oracle"></ComboBoxItem>
             <ComboBoxItem Content="SqlServer"></ComboBoxItem>
             <ComboBoxItem Content="MySql"></ComboBoxItem>
-        </ComboBox>    
+        </ComboBox>
         <Label Content="库类型：" Name="labDbType" HorizontalAlignment="Left" Margin="20,50,0,0" VerticalAlignment="Top"/>
         <Label Content="用户名：" Name="labUserName" HorizontalAlignment="Left" Margin="20,90,0,0" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Name="txtUserName" Height="23" Margin="85,90,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180"/>

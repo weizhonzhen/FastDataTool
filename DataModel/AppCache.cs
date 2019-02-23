@@ -101,6 +101,6 @@ namespace DataModel
         /// 脱机
         /// </summary>
         /// <param name="link"></param>
-        public static void SetOffLine(DataLink link) { DataCache.Clear(GetLinkKey(link)); }
+        public static void SetOffLine(DataLink link) { DataCache.Remove(GetLinkKey(link)); }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using DataModel;
 
-namespace Data
+namespace FastDataTool
 {
     /// <summary>
     /// SetLink.xaml 的交互逻辑
@@ -132,7 +132,7 @@ namespace Data
                 Common.SaveConfigLinkAll(list);
 
                 dbTypeLink.ItemsSource = list;
-                DataCache.Clear("buildLink");
+                DataCache.Remove("buildLink");
                 InitLinkInfo();
             }
         }

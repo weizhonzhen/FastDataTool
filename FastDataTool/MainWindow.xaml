@@ -14,21 +14,19 @@
             <ColumnDefinition Width="628*"/>
             <ColumnDefinition Width="317*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="选择数据库" HorizontalAlignment="Left" Margin="33,16,0,0" VerticalAlignment="Top" Width="75" Click="Button_Change_Database" Height="22"/>
-
+        <Button Content="选择数据库" HorizontalAlignment="Left" Margin="33,16,0,0" VerticalAlignment="Top" Width="75" Click="Change_Database" Height="22"/>
         <Button Content="加载表结构" HorizontalAlignment="Left" Margin="124,16,0,0" VerticalAlignment="Top" Width="75" Click="Show_Table" Height="22"/>
-
         <Label Content="表名：" HorizontalAlignment="Left" Margin="33,45,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.326,0.115" Height="26" Width="46"/>
         <TextBox Name="txtTable" Height="23" Margin="84,48,366,0" TextWrapping="Wrap" Text="" VerticalContentAlignment="Center"  VerticalAlignment="Top"/>
-
         <Label Content="备注：" HorizontalAlignment="Left" Margin="296,45,0,0" VerticalAlignment="Top" Height="26" Width="46"/>
         <TextBox Name="txtComments" HorizontalAlignment="Left" Height="23" VerticalContentAlignment="Center" Margin="348,48,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="195"/>
-
-        <Button Content="查 询" HorizontalAlignment="Left" Margin="563,48,0,0" VerticalAlignment="Top" Width="59" Click="Button_Query_Table" Height="22"/>
+        <Button Content="查 询" HorizontalAlignment="Left" Margin="563,48,0,0" VerticalAlignment="Top" Width="59" Click="Query_Table" Height="22"/>
+        <Button x:Name="nextTable" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="12,49,0,0" VerticalAlignment="Top" Width="57" Click="Next_Table"/>
+        <Button x:Name="bulidChm" Content="生成CHM" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="87,49,0,0" VerticalAlignment="Top" Width="65" Click="Bulid_Chm"/>
 
         <RadioButton GroupName="radioGroup" x:Name="isMap" Content="Map" Margin="446,84,131,0" VerticalAlignment="Top"/>
         <RadioButton GroupName="radioGroup" x:Name="isModel" IsChecked="True" Content="Model" Margin="502,84,62,0" VerticalAlignment="Top" RenderTransformOrigin="1.057,0.562"/>
-        <RadioButton GroupName="radioGroup" x:Name="isOldModel" IsChecked="True" Content="OldModel" Margin="565,84,293,0" VerticalAlignment="Top" RenderTransformOrigin="1.057,0.562" Grid.ColumnSpan="2"/>
+        <RadioButton GroupName="radioGroup" x:Name="isOldModel" IsChecked="False" Content="OldModel" Margin="565,84,293,0" VerticalAlignment="Top" RenderTransformOrigin="1.057,0.562" Grid.ColumnSpan="2"/>
         <RadioButton GroupName="radioGroup" Name="isSerialize" Content="序列化" HorizontalAlignment="Left" Margin="29,84,0,0" VerticalAlignment="Top" Height="16" Width="70" Grid.Column="1"/>
         <RadioButton GroupName="radioGroup" Name="isCheck" Content="模型验证" HorizontalAlignment="Left" Margin="100,84,0,0" VerticalAlignment="Top" Grid.Column="1" Height="16" Width="80"/>
 
@@ -40,17 +38,15 @@
             <ComboBoxItem Content="Java"></ComboBoxItem>
         </ComboBox>
 
-        <Button Content="选择目录" HorizontalAlignment="Left" Margin="352,78,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click" Height="22"/>
-
+        <Button Content="选择目录" HorizontalAlignment="Left" Margin="352,78,0,0" VerticalAlignment="Top" Width="75" Click="Chang_Directory" Height="22"/>
         <Button Content="生成模板" HorizontalAlignment="Left" Margin="187,78,0,0" VerticalAlignment="Top" Width="75" Click="Build_Model" Height="22" Grid.Column="1"/>
-
         <Button Content="增加自定义实体" HorizontalAlignment="Left" Margin="502,16,0,0" VerticalAlignment="Top" Width="105" Click="Add_Define" RenderTransformOrigin="0.79,2.091" Height="22"/>
-
         <Button Content="查看自定义实体" HorizontalAlignment="Left" Margin="618,16,0,0" VerticalAlignment="Top" Width="105" Click="Query_Define" Height="22" Grid.ColumnSpan="2"/>
-
         <Button Content="增加表单元素" HorizontalAlignment="Left" Margin="110,16,0,0" VerticalAlignment="Top" Width="105" Click="Add_FromItem" RenderTransformOrigin="0.79,2.091" Height="22" Grid.Column="1"/>
-
         <Button Content="查看表单" HorizontalAlignment="Left" Margin="227,16,0,0" VerticalAlignment="Top" Width="75" Click="Query_From" RenderTransformOrigin="0.79,2.091" Height="22" Grid.Column="1"/>
+        <Button Content="加载视图结构" HorizontalAlignment="Left" Margin="304,16,0,0" VerticalAlignment="Top" Width="85" Click="Show_View" Height="22"/>
+        <Button Content="更新视图结构" HorizontalAlignment="Left" Margin="406,16,0,0" VerticalAlignment="Top" Width="85" Click="ReLoad_View" Height="22"/>
+        <Button Content="更新表结构" HorizontalAlignment="Left" Margin="215,16,0,0" VerticalAlignment="Top" Width="75" Click="ReLoad_Table" Height="22"/>
 
         <!--<Button Content="大数据迁移" HorizontalAlignment="Left" Margin="184,53,0,0" VerticalAlignment="Top" Width="80" Click="Button_Click_1" RenderTransformOrigin="1.075,0.545" Grid.Column="1" Height="22"/>-->
 
@@ -104,17 +100,12 @@
                 <DataGridTextColumn Header="是空" IsReadOnly="True" ElementStyle="{StaticResource StyleCellText}" Binding="{Binding Path=isNull}" Width="40" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button Content="Button" Grid.Column="1" HorizontalAlignment="Left" Margin="516,307,-274,0" VerticalAlignment="Top" Width="75"/>
 
-        <Button Name="button" Content="查询列" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="198,525,0,0" VerticalAlignment="Top" Width="55" RenderTransformOrigin="0.92,0.227" Click="button_Click_2"/>
         <TextBox Name="findColName" HorizontalAlignment="Left"  VerticalContentAlignment="Center" Height="23" Margin="447,525,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="160"/>
         <Label Name="txtFindColName" Content="列名:" HorizontalAlignment="Left" Margin="409,523,0,0" VerticalAlignment="Top"/>
         <Label x:Name="txtFindColRemark" Content="备注:" HorizontalAlignment="Left" Margin="612,523,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="47"/>
         <TextBox x:Name="findColRemark" Grid.Column="1" VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="23" Margin="0,525,129,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="160"/>
-        <Button x:Name="button1" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="12,49,0,0" VerticalAlignment="Top" Width="57" Click="button1_Click"/>
-        <Button x:Name="button2" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="263,525,0,0" VerticalAlignment="Top" Width="50" Click="button2_Click"/>
-        <Button Content="加载视图结构" HorizontalAlignment="Left" Margin="304,16,0,0" VerticalAlignment="Top" Width="85" Click="Show_View" Height="22"/>
-        <Button Content="更新视图结构" HorizontalAlignment="Left" Margin="406,16,0,0" VerticalAlignment="Top" Width="85" Click="ReLoad_View" Height="22"/>
-        <Button Content="更新表结构" HorizontalAlignment="Left" Margin="215,16,0,0" VerticalAlignment="Top" Width="75" Click="ReLoad_Table" Height="22"/>
+        <Button Name="QueryColumn" Content="查询列" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="198,525,0,0" VerticalAlignment="Top" Width="55" RenderTransformOrigin="0.92,0.227" Click="Query_Column"/>
+        <Button x:Name="NextColumn" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="263,525,0,0" VerticalAlignment="Top" Width="50" Click="Next_Column"/>
     </Grid>
 </Window>
