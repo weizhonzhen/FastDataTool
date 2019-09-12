@@ -25,7 +25,7 @@ namespace <#=entity.nameSpace#>
  	    /// <#=c.colComments#>
 	    /// </summary>
 		<#=c.requiredMessage#>
-		[MaxLength(<#=c.colLength#>, ErrorMessage = "<#=c.maxMessage#>")]
+		[StringLength(<#=c.colLength#>, ErrorMessage = "<#=c.maxMessage#>")]
 	    [Display(Name = "<#=c.colComments#>")]
 		public <#=c.colType#> <#=c.colName#>{ get; set; }
 <#
