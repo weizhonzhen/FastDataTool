@@ -508,7 +508,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            Common.OpenWin(new DataMove_1(), this);
+            //Common.OpenWin(new DataMove_1(), this);
         }
         #endregion
 
