@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text;
 
-namespace Data
+namespace FastDataTool
 {
     /// <summary>
     /// 代码生成器
