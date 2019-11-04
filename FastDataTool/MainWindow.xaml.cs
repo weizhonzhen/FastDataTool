@@ -842,8 +842,9 @@ namespace FastDataTool
                     if (AppCache.GetBuildLink().dbType == DataDbType.SqlServer)
                     {
                         foreach (var temp in field)
-                        {
-                            sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}','column','{2}';\r\n", temp.colComments.Replace("'", ""), (item as BaseTable).tabName, temp.colName);
+                        {                        
+                            if (temp.colComments != "")
+                                sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}','column','{2}';\r\n", temp.colComments.Replace("'", ""), (item as BaseTable).tabName, temp.colName);
                         }
                         sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}',null,null;\r\n", (item as BaseTable).tabComments.Replace("'", ""), (item as BaseTable).tabName);
                     }
@@ -852,8 +853,9 @@ namespace FastDataTool
                     {
                         sql.Append("\r\n tablespace USERS pctfree 10 initrans 1 maxtrans 255 storage(initial 64K minextents 1 maxextents unlimited);\r\n");
                         foreach(var temp in field)
-                        {
-                            sql.AppendFormat("comment on column {0}.{1} is '{2}'; \r\n", (item as BaseTable).tabName, temp.colName, temp.colComments.Replace("'", ""));
+                        {                        
+                            if (temp.colComments != "")
+                                sql.AppendFormat("comment on column {0}.{1} is '{2}'; \r\n", (item as BaseTable).tabName, temp.colName, temp.colComments.Replace("'", ""));
                         }
                         sql.AppendFormat("comment on table {0} is '{1}';\r\n", (item as BaseTable).tabName, (item as BaseTable).tabComments.Replace("'", ""));
                     }
