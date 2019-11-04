@@ -788,6 +788,7 @@ namespace FastDataTool
         }
         #endregion
 
+       
         #region 生成建表语句
         /// <summary>
         /// 生成建表语句
@@ -819,9 +820,9 @@ namespace FastDataTool
                         if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
                         {
                             if (temp.isNull == "是")
-                                sql.AppendFormat("\t{0} {1}{2} comment {3}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",", temp.colComments);
+                                sql.AppendFormat("\t{0} {1}{2} comment {3}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",", temp.colComments.Replace("'",""));
                             else
-                                sql.AppendFormat("\t{0} {1} not null{2} comment {3}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",", temp.colComments);
+                                sql.AppendFormat("\t{0} {1} not null{2} comment {3}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",", temp.colComments.Replace("'", ""));
                         }
                         else
                         {
@@ -834,7 +835,7 @@ namespace FastDataTool
                     }
 
                     if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
-                        sql.AppendFormat(")comment={0} ", (item as BaseTable).tabComments);
+                        sql.AppendFormat(")comment={0} ", (item as BaseTable).tabComments.Replace("'", ""));
                     else
                         sql.Append(") ");
 
@@ -842,9 +843,9 @@ namespace FastDataTool
                     {
                         foreach (var temp in field)
                         {
-                            sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}','column','{2}';\r\n", temp.colComments, (item as BaseTable).tabName, temp.colName);
+                            sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}','column','{2}';\r\n", temp.colComments.Replace("'", ""), (item as BaseTable).tabName, temp.colName);
                         }
-                        sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}',null,null;\r\n", (item as BaseTable).tabComments, (item as BaseTable).tabName);
+                        sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}',null,null;\r\n", (item as BaseTable).tabComments.Replace("'", ""), (item as BaseTable).tabName);
                     }
 
                     if (AppCache.GetBuildLink().dbType == DataDbType.Oracle)
@@ -852,9 +853,9 @@ namespace FastDataTool
                         sql.Append("\r\n tablespace USERS pctfree 10 initrans 1 maxtrans 255 storage(initial 64K minextents 1 maxextents unlimited);\r\n");
                         foreach(var temp in field)
                         {
-                            sql.AppendFormat("comment on column {0}.{1}  is '{2}'; \r\n", (item as BaseTable).tabName, temp.colName, temp.colComments);
+                            sql.AppendFormat("comment on column {0}.{1} is '{2}'; \r\n", (item as BaseTable).tabName, temp.colName, temp.colComments.Replace("'", ""));
                         }
-                        sql.AppendFormat("comment on table {0} is '{1}';\r\n", (item as BaseTable).tabName, (item as BaseTable).tabComments);
+                        sql.AppendFormat("comment on table {0} is '{1}';\r\n", (item as BaseTable).tabName, (item as BaseTable).tabComments.Replace("'", ""));
                     }
 
                     File.WriteAllText(string.Format("{0}/{1}.sql", path, (item as BaseTable).tabName), sql.ToString(), Encoding.UTF8);
