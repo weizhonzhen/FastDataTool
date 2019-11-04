@@ -352,12 +352,13 @@ namespace DataModel
             switch (column.colType.ToLower().Trim())
             {
                 case "char":
-                case "nchar":
                 case "varchar":
-                case "nvarchar":
                 case "varchar2":
-                case "nvarchar2":
                     return string.Format("{0}({1})", column.colType, column.colLength == -1 ? "max" : column.colLength.ToString());
+                case "nchar":
+                case "nvarchar":
+                case "nvarchar2":
+                    return string.Format("{0}({1})", column.colType, column.colLength == -1 ? "max" : (column.colLength/2).ToString());
                 case "decimal":
                 case "numeric":
                 case "number":
