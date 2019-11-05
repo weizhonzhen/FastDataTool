@@ -789,6 +789,7 @@ namespace FastDataTool
         #endregion
 
        
+       
         #region 生成建表语句
         /// <summary>
         /// 生成建表语句
@@ -797,6 +798,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void Bulid_Table(object sender, RoutedEventArgs e)
         {
+            var bat = new StringBuilder();
             var path = string.Format("{0}sql", AppDomain.CurrentDomain.BaseDirectory);
 
             if (txtFile != "")
@@ -835,34 +837,52 @@ namespace FastDataTool
                     }
 
                     if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
+                    {
                         sql.AppendFormat(")comment={0} ", (item as BaseTable).tabComments.Replace("'", ""));
+                        bat.AppendFormat("mysql -h {0} -u {1} -p {2} < @{3}.sql\r\n", AppCache.GetBuildLink().hostName, AppCache.GetBuildLink().userName, AppCache.GetBuildLink().userPwd, (item as BaseTable).tabName);
+                    }
                     else
                         sql.Append(") ");
 
                     if (AppCache.GetBuildLink().dbType == DataDbType.SqlServer)
                     {
                         foreach (var temp in field)
-                        {                        
+                        {
                             if (temp.colComments != "")
                                 sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}','column','{2}';\r\n", temp.colComments.Replace("'", ""), (item as BaseTable).tabName, temp.colName);
                         }
                         sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}',null,null;\r\n", (item as BaseTable).tabComments.Replace("'", ""), (item as BaseTable).tabName);
+
+                        bat.AppendFormat("sqlcmd -U {0} -P {1} -i @{2}.sql\r\n", AppCache.GetBuildLink().userName, AppCache.GetBuildLink().userPwd, (item as BaseTable).tabName);
                     }
 
                     if (AppCache.GetBuildLink().dbType == DataDbType.Oracle)
                     {
                         sql.Append("\r\n tablespace USERS pctfree 10 initrans 1 maxtrans 255 storage(initial 64K minextents 1 maxextents unlimited);\r\n");
                         foreach(var temp in field)
-                        {                        
+                        {
                             if (temp.colComments != "")
                                 sql.AppendFormat("comment on column {0}.{1} is '{2}'; \r\n", (item as BaseTable).tabName, temp.colName, temp.colComments.Replace("'", ""));
                         }
                         sql.AppendFormat("comment on table {0} is '{1}';\r\n", (item as BaseTable).tabName, (item as BaseTable).tabComments.Replace("'", ""));
+
+                        bat.AppendFormat("sqlplus {0}/{1}@{2} @{3}.sql> CreateTable.log\r\n", AppCache.GetBuildLink().userName, AppCache.GetBuildLink().userPwd, AppCache.GetBuildLink().serverValue, (item as BaseTable).tabName);
                     }
 
                     File.WriteAllText(string.Format("{0}/{1}.sql", path, (item as BaseTable).tabName), sql.ToString(), Encoding.UTF8);
                 }
             }
+
+            bat.Append("exit;");
+
+            if (AppCache.GetBuildLink().dbType == DataDbType.Oracle)
+                File.WriteAllText(string.Format("{0}/Oracle.bat", path), bat.ToString(), Encoding.UTF8);
+
+            if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
+                File.WriteAllText(string.Format("{0}/MySql.bat", path), bat.ToString(), Encoding.UTF8);
+
+            if (AppCache.GetBuildLink().dbType == DataDbType.SqlServer)
+                File.WriteAllText(string.Format("{0}/SqlServer.bat", path), bat.ToString(), Encoding.UTF8);
 
             CodeBox.Show("生成成功", this);
         }
