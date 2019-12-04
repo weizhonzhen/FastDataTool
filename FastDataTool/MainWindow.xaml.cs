@@ -527,10 +527,7 @@ namespace FastDataTool
             list.Add(item);
             AppCache.SetTableList(list, AppCache.GetBuildLink());
 
-            Task.Factory.StartNew(() =>
-            {
-                DataSchema.UpdateTabComments(e.Row.Item as BaseTable, AppCache.GetBuildLink());
-            });
+            DataSchema.UpdateTabComments(e.Row.Item as BaseTable, AppCache.GetBuildLink());
         }
         #endregion
 
@@ -712,10 +709,7 @@ namespace FastDataTool
                 AppCache.SetTableColumn(list, DataSchema.GetColumnKey(AppCache.GetBuildLink(), table.tabName));
             }
 
-            Task.Factory.StartNew(() =>
-            {
-                DataSchema.UpdateColComments(e.Row.Item as BaseColumn, Dtable.SelectedItem as BaseTable, AppCache.GetBuildLink());
-            });
+            DataSchema.UpdateColComments(e.Row.Item as BaseColumn, Dtable.SelectedItem as BaseTable, AppCache.GetBuildLink());
         }
         #endregion
 
