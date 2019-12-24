@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DataModel
 {
@@ -115,6 +115,11 @@ namespace DataModel
         /// 表单元素类型
         /// </summary>
         public string fromType { get; set; }
+
+        /// <summary>
+        /// 默认值
+        /// </summary>
+        public string defaultData { get; set; }
     }
     #endregion
 
