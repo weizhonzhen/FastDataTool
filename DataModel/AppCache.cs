@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace DataModel
 {
@@ -52,7 +52,7 @@ namespace DataModel
         public static void SetDefineTable(BaseTable item) { DataCache.Set<BaseTable>("defineTable", item); }
 
         //表单元素
-        public static List<FromItems> GetFromList() { return DataCache.Get<List<FromItems>>("fromItem"); }
+        public static List<FromItems> GetFromList() { return DataCache.Get<List<FromItems>>("fromItem")??new List<FromItems>(); }
         public static void SetFromList(List<FromItems> item) { DataCache.Set<List<FromItems>>("fromItem", item); }
 
         //自定义列
