@@ -26,7 +26,7 @@ namespace <#=entity.nameSpace#>
  	    /// <#=c.colComments#>
 	    /// </summary>
 		[DataMember]
-		public <#=c.colType#> <#=c.colName#>{ get; set; }
+		public <#=c.colType#> <#=c.colName#>{ get; set; }<#=c.defaultData#>
 <#
 		}
 #>      
