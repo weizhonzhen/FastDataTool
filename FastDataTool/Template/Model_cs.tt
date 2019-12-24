@@ -23,7 +23,7 @@ namespace <#=entity.nameSpace#>
         /// <summary>
  	    /// <#=c.colComments#>
 	    /// </summary>
-		public <#=c.colType#><#=c.showNull#> <#=c.colName#>{ get; set; }
+		public <#=c.colType#><#=c.showNull#> <#=c.colName#>{ get; set; }<#=c.defaultData#>
 <#
 		}
 #>      
