@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace DataModel
@@ -93,6 +93,25 @@ namespace DataModel
                     item.colType = GetCsType(item.colType);
                 else
                     item.colType = GetJavaType(item.colType);
+
+                if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "decimal")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "byte")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "short")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "int")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "long")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "float")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData) && item.colType == "double")
+                    item.defaultData = string.Format("={0};", item.defaultData);
+                else if (!string.IsNullOrEmpty(item.defaultData))
+                    item.defaultData = string.Format("=\"{0}\";", item.defaultData);
+                else
+                    item.defaultData = "";
 
                 if (item.isKey)
                     item.colComments = string.Format("(主键){0}", item.colComments);
