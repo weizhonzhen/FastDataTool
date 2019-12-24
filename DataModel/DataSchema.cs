@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -246,7 +246,7 @@ namespace DataModel
                                                 where aa.constraint_name = bb.constraint_name and bb.constraint_type = 'P' and bb.table_name = '"
                                             + tableName + @"' and aa.column_name=a.column_name),(select count(0) from user_ind_columns t,user_indexes i 
                                             where t.index_name = i.index_name and t.table_name = i.table_name and t.table_name = '"
-                                            + tableName + @"' and t.column_name=a.column_name),nullable,data_precision,data_scale
+                                            + tableName + @"' and t.column_name=a.column_name),nullable,data_precision,data_scale,data_default
                                             from user_tab_columns a inner join user_col_comments b
                                             on a.table_name='" + tableName +
                                             "' and a.table_name=b.table_name and a.column_name=b.column_name order by a.column_id asc";
@@ -270,7 +270,8 @@ namespace DataModel
                                         + tableName + @"' and COLUMN_NAME=a.name),
                                         (SELECT count(0) FROM sysindexes aa JOIN sysindexkeys bb ON aa.id=bb.id AND aa.indid=bb.indid 
                                          JOIN sysobjects cc ON bb.id=cc.id  JOIN syscolumns dd ON bb.id=dd.id AND bb.colid=dd.colid 
-                                         WHERE aa.indid NOT IN(0,255) AND cc.name='" + tableName + @"' and dd.name=a.name),isnullable,prec,scale
+                                         WHERE aa.indid NOT IN(0,255) AND cc.name='" + tableName + @"' and dd.name=a.name),
+                                        isnullable,prec,scale,REPLACE(REPLACE(REPLACE(REPLACE( t2.text,'((',''),'))',''),'(N''',''),''')','')
                                         from syscolumns a left join sys.extended_properties b 
                                         on major_id = id and minor_id = colid and b.name ='MS_Description' 
                                         where a.id=object_id('" + tableName + "') order by a.colid asc";
@@ -294,7 +295,7 @@ namespace DataModel
                                             + "' and TABLE_NAME='" + tableName + @"' and constraint_name='PRIMARY' and c.column_name=a.column_name),
                                             (SELECT count(0) from information_schema.statistics a where table_schema = '"
                                             + link.serverValue + "' and table_name = '" + tableName + @"' and c.column_name=a.column_name),
-                                            is_nullable,numeric_precision,numeric_scale,column_type from information_schema.columns c where table_name='"
+                                            is_nullable,numeric_precision,numeric_scale,column_type,default(column_name) from information_schema.columns c where table_name='"
                                             + tableName + "'  order by ordinal_position asc";
                         var rd = cmd.ExecuteReader();
                         dt.Load(rd);
@@ -323,6 +324,7 @@ namespace DataModel
                     else
                         column.showType = GetShowColType(column);
 
+                    column.defaultData = item.ItemArray[10].ToString();
                     column.showColName = string.Format("{0}{1}{2}", column.isKey ? "(主键) " : "", column.isIndex ? "(索引) " : "", column.colName);
                     column.showTypeColName = string.Format("{0}  [{1}]", column.colName, column.showType);
 
@@ -352,13 +354,12 @@ namespace DataModel
             switch (column.colType.ToLower().Trim())
             {
                 case "char":
-                case "varchar":
-                case "varchar2":
-                    return string.Format("{0}({1})", column.colType, column.colLength == -1 ? "max" : column.colLength.ToString());
                 case "nchar":
+                case "varchar":
                 case "nvarchar":
+                case "varchar2":
                 case "nvarchar2":
-                    return string.Format("{0}({1})", column.colType, column.colLength == -1 ? "max" : (column.colLength/2).ToString());
+                    return string.Format("{0}({1})", column.colType, column.colLength == -1 ? "max" : column.colLength.ToString());
                 case "decimal":
                 case "numeric":
                 case "number":
