@@ -319,12 +319,15 @@ namespace DataModel
                     column.scale = item.ItemArray[8] == DBNull.Value ? 0 : int.Parse(item.ItemArray[8].ToString());
                     column.isIndex = item.ItemArray[5].ToString() != "0" ? true : false;
 
-                    if (link.dbType == DataDbType.MySql)
+                   if (link.dbType == DataDbType.MySql)
+                    {
                         column.showType = item.ItemArray[9] == DBNull.Value ? GetShowColType(column) : item.ItemArray[9].ToString();
+                        column.defaultData = item.ItemArray[10].ToString();
+                    }
                     else
                         column.showType = GetShowColType(column);
-
-                    column.defaultData = item.ItemArray[10].ToString();
+                    
+                    column.defaultData = item.ItemArray[9].ToString();
                     column.showColName = string.Format("{0}{1}{2}", column.isKey ? "(主键) " : "", column.isIndex ? "(索引) " : "", column.colName);
                     column.showTypeColName = string.Format("{0}  [{1}]", column.colName, column.showType);
 
