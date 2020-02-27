@@ -140,7 +140,7 @@ namespace DataModel
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText = "select view_name from user_views";
+                        cmd.CommandText = "select a.VIEW_NAME from all_views a where a.owner!='SYSTEM' and a.owner!='EXFSYS' and a.owner!='SYSMAN' and a.owner!='SYS' and a.owner!='WMSYS'";
                         var rd = cmd.ExecuteReader();
                         dt.Load(rd);
                         conn.Close();
@@ -247,7 +247,7 @@ namespace DataModel
                                             + tableName + @"' and aa.column_name=a.column_name),(select count(0) from user_ind_columns t,user_indexes i 
                                             where t.index_name = i.index_name and t.table_name = i.table_name and t.table_name = '"
                                             + tableName + @"' and t.column_name=a.column_name),nullable,data_precision,data_scale,data_default
-                                            from user_tab_columns a inner join user_col_comments b
+                                            from all_tab_columns a inner join all_tab_columns b
                                             on a.table_name='" + tableName +
                                             "' and a.table_name=b.table_name and a.column_name=b.column_name order by a.column_id asc";
                         var rd = cmd.ExecuteReader();
