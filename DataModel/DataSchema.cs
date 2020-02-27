@@ -242,9 +242,9 @@ namespace DataModel
                         conn.Open();
                         var cmd = conn.CreateCommand();
                         cmd.CommandText = @"select a.column_name,data_type,data_length,b.comments,
-                                            (select count(0) from user_cons_columns aa, user_constraints bb
+                                            (select count(0) from all_cons_columns aa, all_constraints bb
                                                 where aa.constraint_name = bb.constraint_name and bb.constraint_type = 'P' and bb.table_name = '"
-                                            + tableName + @"' and aa.column_name=a.column_name),(select count(0) from user_ind_columns t,user_indexes i 
+                                            + tableName + @"' and aa.column_name=a.column_name),(select count(0) from all_ind_columns t,all_indexes i 
                                             where t.index_name = i.index_name and t.table_name = i.table_name and t.table_name = '"
                                             + tableName + @"' and t.column_name=a.column_name),nullable,data_precision,data_scale,data_default
                                             from all_tab_columns a inner join all_tab_columns b
