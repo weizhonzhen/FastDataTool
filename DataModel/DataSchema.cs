@@ -48,7 +48,7 @@ namespace DataModel
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("select a.table_name,comments from all_tables a inner join user_tab_comments b on a.TABLE_NAME=b.TABLE_NAME {0} and a.TABLESPACE_NAME!='SYSAUX' and a.TABLESPACE_NAME!='SYSTEM'"
+                        cmd.CommandText = string.Format("select a.table_name,comments from all_tables a inner join all_tab_comments b on a.TABLE_NAME=b.TABLE_NAME {0} and a.TABLESPACE_NAME!='SYSAUX' and a.TABLESPACE_NAME!='SYSTEM'"
                                     , (String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and a.table_name='{0}'", tableName)));
 
                         var rd = cmd.ExecuteReader();
