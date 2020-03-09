@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using System.Data;
 using System.Data.SqlClient;
 using Oracle.ManagedDataAccess.Client;
 using MySql.Data.MySqlClient;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Data.Common;
 
 namespace DataModel
 {
@@ -33,10 +33,11 @@ namespace DataModel
         /// <param name="dbType">数据库类型</param>
         /// <param name="strConn">连接串</param>
         /// <returns></returns>
-        public static List<BaseTable> TableList(DataLink link, string tableName = "", bool isUpdate = false)
+        public static List<BaseTable> TableList(DataLink link,bool isUpdate=false)
         {
             try
             {
+                DbConnection conn = null;
                 var list = new List<BaseTable>();
                 var dt = new DataTable();
 
@@ -44,17 +45,13 @@ namespace DataModel
                 if (link.dbType == DataDbType.Oracle)
                 {
                     #region oracle
-                    using (var conn = new OracleConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("select a.table_name,comments from all_tables a inner join all_tab_comments b on a.TABLE_NAME=b.TABLE_NAME {0} and a.TABLESPACE_NAME!='SYSAUX' and a.TABLESPACE_NAME!='SYSTEM'"
-                                    , (String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and a.table_name='{0}'", tableName)));
+                    conn = new OracleConnection(link.connStr);                    
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = "select distinct a.table_name,comments from all_tables a inner join all_tab_comments b on a.TABLE_NAME=b.TABLE_NAME and a.TABLESPACE_NAME!='SYSAUX' and a.TABLESPACE_NAME!='SYSTEM'";
 
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        conn.Close();
-                    }
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
                     #endregion
                 }
 
@@ -62,17 +59,13 @@ namespace DataModel
                 if (link.dbType == DataDbType.SqlServer)
                 {
                     #region sqlserver
-                    using (var conn = new SqlConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("select name,(select top 1 value from sys.extended_properties where major_id=object_id(a.name) and minor_id=0) as value from sys.objects a where type='U' {0}"
-                                                , (String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and name='{0}'", tableName)));
+                    conn = new SqlConnection(link.connStr);
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = "select name,(select top 1 value from sys.extended_properties where major_id=object_id(a.name) and minor_id=0) as value from sys.objects a where type='U'";
 
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        conn.Close();
-                    }
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
                     #endregion
                 }
 
@@ -80,18 +73,13 @@ namespace DataModel
                 if (link.dbType == DataDbType.MySql)
                 {
                     #region mysql
-                    using (var conn = new MySqlConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("select table_name, table_comment from information_schema.TABLES where table_schema='{0}'{1} and table_type='BASE TABLE'"
-                                                        , link.serverValue, String.IsNullOrEmpty(tableName) || tableName == "loadColumnList" ? "" : string.Format(" and name='{0}'", tableName));
+                    conn = new MySqlConnection(link.connStr);
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = string.Format("select table_name, table_comment from information_schema.TABLES where table_schema='{0}' and table_type='BASE TABLE'", link.serverValue);
 
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-
-                        conn.Close();
-                    }
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
                     #endregion
                 }
 
@@ -101,14 +89,10 @@ namespace DataModel
                     table.tabComments = item.ItemArray[1] == DBNull.Value ? "" : item.ItemArray[1].ToString();
                     table.tabName = item.ItemArray[0] == DBNull.Value ? "" : item.ItemArray[0].ToString();
                     list.Add(table);
-
-                    //预先加载列信息
-                    if (tableName == "loadColumnList")
-                    {
-                        ColumnList(link, table.tabName, isUpdate);
-                    }
+                    ColumnList(link, table.tabName, conn,isUpdate);
                 }
 
+                conn.Close();
                 return list;
             }
             catch
@@ -125,10 +109,11 @@ namespace DataModel
         /// <param name="dbType">数据库类型</param>
         /// <param name="strConn">连接串</param>
         /// <returns></returns>
-        public static List<BaseTable> ViewList(DataLink link, string tableName = "", bool isUpdate = false)
+        public static List<BaseTable> ViewList(DataLink link, bool isUpdate = false)
         {
             try
             {
+                DbConnection conn = null;
                 var list = new List<BaseTable>();
                 var dt = new DataTable();
 
@@ -136,15 +121,12 @@ namespace DataModel
                 if (link.dbType == DataDbType.Oracle)
                 {
                     #region oracle
-                    using (var conn = new OracleConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = "select a.VIEW_NAME from all_views a where a.owner!='SYSTEM' and a.owner!='EXFSYS' and a.owner!='SYSMAN' and a.owner!='SYS' and a.owner!='WMSYS'";
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        conn.Close();
-                    }
+                    conn = new OracleConnection(link.connStr);
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = "select a.VIEW_NAME from all_views a where a.owner!='SYSTEM' and a.owner!='EXFSYS' and a.owner!='SYSMAN' and a.owner!='SYS' and a.owner!='WMSYS'";
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
                     #endregion
                 }
 
@@ -152,16 +134,13 @@ namespace DataModel
                 if (link.dbType == DataDbType.SqlServer)
                 {
                     #region sqlserver
-                    using (var conn = new SqlConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = "select name from sys.views";
+                    conn = new SqlConnection(link.connStr);
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = "select name from sys.views";
 
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        conn.Close();
-                    }
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
                     #endregion
                 }
 
@@ -169,17 +148,13 @@ namespace DataModel
                 if (link.dbType == DataDbType.MySql)
                 {
                     #region mysql
-                    using (var conn = new MySqlConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = string.Format("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.views WHERE TABLE_SCHEMA = '{0}'", link.serverValue);
+                    conn = new MySqlConnection(link.connStr);                    
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = string.Format("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.views WHERE TABLE_SCHEMA = '{0}'", link.serverValue);
 
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-
-                        conn.Close();
-                    }
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
                     #endregion
                 }
 
@@ -189,13 +164,9 @@ namespace DataModel
                     table.tabComments = "";
                     table.tabName = item.ItemArray[0] == DBNull.Value ? "" : item.ItemArray[0].ToString();
                     list.Add(table);
-
-                    //预先加载列信息
-                    if (tableName == "loadColumnList")
-                    {
-                        ColumnList(link, table.tabName, isUpdate);
-                    }
+                    ColumnList(link, table.tabName, conn,isUpdate);
                 }
+                conn.Close();
                 return list;
             }
             catch
@@ -213,12 +184,13 @@ namespace DataModel
         /// <param name="strConn">连接串</param>
         /// <param name="tableName">表名</param>
         /// <returns></returns>
-        public static List<BaseColumn> ColumnList(DataLink link, string tableName, bool isUpdate = false)
+        public static List<BaseColumn> ColumnList(DataLink link, string tableName,DbConnection conn=null,bool isUpdate=false)
         {
             try
             {
                 var key = GetColumnKey(link, tableName);
-                if (AppCache.ExistsTableColumn(key) && !isUpdate)
+                
+                if (conn == null || isUpdate == false)
                     return AppCache.GetTableColumn(key);
 
                 //脱机
@@ -236,72 +208,58 @@ namespace DataModel
                 if (link.dbType == DataDbType.Oracle)
                 {
                     #region oracle
-                    using (var conn = new OracleConnection(link.connStr))
-                    {
-                        tableName = tableName.ToUpper();
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = @"select a.column_name,data_type,data_length,b.comments,
-                                            (select count(0) from all_cons_columns aa, all_constraints bb
-                                                where aa.constraint_name = bb.constraint_name and bb.constraint_type = 'P' and bb.table_name = '"
-                                            + tableName + @"' and aa.column_name=a.column_name),(select count(0) from all_ind_columns t,user_indexes i 
-                                            where t.index_name = i.index_name and t.table_name = i.table_name and t.table_name = '"
-                                            + tableName + @"' and t.column_name=a.column_name),nullable,data_precision,data_scale,data_default
-                                            from all_tab_columns a inner join all_col_comments b
-                                            on a.table_name='" + tableName +
-                                            "' and a.table_name=b.table_name and a.column_name=b.column_name order by a.column_id asc";
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        rd.Close();
-                        conn.Close();
-                    }
+                    tableName = tableName.ToUpper();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = @"select a.column_name,data_type,data_length,b.comments,
+                                        (select count(0) from all_cons_columns aa, all_constraints bb
+                                            where aa.constraint_name = bb.constraint_name and bb.constraint_type = 'P' and bb.table_name = '"
+                                        + tableName + @"' and aa.column_name=a.column_name),(select count(0) from all_ind_columns t,user_indexes i 
+                                        where t.index_name = i.index_name and t.table_name = i.table_name and t.table_name = '"
+                                        + tableName + @"' and t.column_name=a.column_name),nullable,data_precision,data_scale,data_default
+                                        from all_tab_columns a inner join all_col_comments b
+                                        on a.table_name='" + tableName +
+                                        "' and a.table_name=b.table_name and a.column_name=b.column_name order by a.column_id asc";
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
+                    rd.Close();                   
                     #endregion
                 }
 
                 if (link.dbType == DataDbType.SqlServer)
                 {
                     #region sql server
-                    using (var conn = new SqlConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = @"select a.name,(select top 1 name from sys.systypes c where a.xtype=c.xtype) as type ,
-                                        length,b.value,(select count(0) from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME='"
-                                        + tableName + @"' and COLUMN_NAME=a.name),
-                                        (SELECT count(0) FROM sysindexes aa JOIN sysindexkeys bb ON aa.id=bb.id AND aa.indid=bb.indid 
-                                         JOIN sysobjects cc ON bb.id=cc.id  JOIN syscolumns dd ON bb.id=dd.id AND bb.colid=dd.colid 
-                                         WHERE aa.indid NOT IN(0,255) AND cc.name='" + tableName + @"' and dd.name=a.name),
-                                        isnullable,prec,scale,REPLACE(REPLACE(REPLACE(REPLACE( t2.text,'((',''),'))',''),'(N''',''),''')','')
-                                        from syscolumns a left join sys.extended_properties b 
-                                        on major_id = id and minor_id = colid and b.name ='MS_Description' 
-                                        where a.id=object_id('" + tableName + "') order by a.colid asc";
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        rd.Close();
-                        conn.Close();
-                    }
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = @"select a.name,(select top 1 name from sys.systypes c where a.xtype=c.xtype) as type ,
+                                    length,b.value,(select count(0) from INFORMATION_SCHEMA.KEY_COLUMN_USAGE where TABLE_NAME='"
+                                    + tableName + @"' and COLUMN_NAME=a.name),
+                                    (SELECT count(0) FROM sysindexes aa JOIN sysindexkeys bb ON aa.id=bb.id AND aa.indid=bb.indid 
+                                        JOIN sysobjects cc ON bb.id=cc.id  JOIN syscolumns dd ON bb.id=dd.id AND bb.colid=dd.colid 
+                                        WHERE aa.indid NOT IN(0,255) AND cc.name='" + tableName + @"' and dd.name=a.name),
+                                    isnullable,prec,scale,REPLACE(REPLACE(REPLACE(REPLACE( t2.text,'((',''),'))',''),'(N''',''),''')','')
+                                    from syscolumns a left join sys.extended_properties b 
+                                    on major_id = id and minor_id = colid and b.name ='MS_Description' 
+                                    where a.id=object_id('" + tableName + "') order by a.colid asc";
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
+                    rd.Close();                    
                     #endregion
                 }
 
                 if (link.dbType == DataDbType.MySql)
                 {
                     #region mysql
-                    using (var conn = new MySqlConnection(link.connStr))
-                    {
-                        conn.Open();
-                        var cmd = conn.CreateCommand();
-                        cmd.CommandText = @"select column_name,data_type,character_maximum_length,column_comment,
-                                            (select count(0) from INFORMATION_SCHEMA.KEY_COLUMN_USAGE a where TABLE_SCHEMA='" + link.serverValue
-                                            + "' and TABLE_NAME='" + tableName + @"' and constraint_name='PRIMARY' and c.column_name=a.column_name),
-                                            (SELECT count(0) from information_schema.statistics a where table_schema = '"
-                                            + link.serverValue + "' and table_name = '" + tableName + @"' and c.column_name=a.column_name),
-                                            is_nullable,numeric_precision,numeric_scale,column_type,default(column_name) from information_schema.columns c where table_name='"
-                                            + tableName + "'  order by ordinal_position asc";
-                        var rd = cmd.ExecuteReader();
-                        dt.Load(rd);
-                        rd.Close();
-                        conn.Close();
-                    }
+                    conn.Open();
+                    var cmd = conn.CreateCommand();
+                    cmd.CommandText = @"select column_name,data_type,character_maximum_length,column_comment,
+                                        (select count(0) from INFORMATION_SCHEMA.KEY_COLUMN_USAGE a where TABLE_SCHEMA='" + link.serverValue
+                                        + "' and TABLE_NAME='" + tableName + @"' and constraint_name='PRIMARY' and c.column_name=a.column_name),
+                                        (SELECT count(0) from information_schema.statistics a where table_schema = '"
+                                        + link.serverValue + "' and table_name = '" + tableName + @"' and c.column_name=a.column_name),
+                                        is_nullable,numeric_precision,numeric_scale,column_type,default(column_name) from information_schema.columns c where table_name='"
+                                        + tableName + "'  order by ordinal_position asc";
+                    var rd = cmd.ExecuteReader();
+                    dt.Load(rd);
+                    rd.Close();
                     #endregion
                 }
 
