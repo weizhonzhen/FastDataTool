@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.IO;
-using System.Text;
 
 namespace FastDataTool
 {
@@ -55,6 +54,7 @@ namespace FastDataTool
             //双击
             notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler((o, e) => { if (e.Button == MouseButtons.Left) this.Show(o, e); });
             #endregion
+
         }
         #endregion
 
@@ -106,7 +106,7 @@ namespace FastDataTool
         private void Show_Table(object sender, RoutedEventArgs e)
         {
             if (!AppCache.ExistsTable(AppCache.GetBuildLink()))
-                AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+                AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink()) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
         }
         #endregion
@@ -119,7 +119,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void ReLoad_Table(object sender, RoutedEventArgs e)
         {
-            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(), "loadColumnList", true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            AppCache.SetTableList(DataSchema.TableList(AppCache.GetBuildLink(),true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
         }
         #endregion
@@ -133,7 +133,7 @@ namespace FastDataTool
         private void Show_View(object sender, RoutedEventArgs e)
         {
             if (!AppCache.ExistsView(AppCache.GetBuildLink()))
-                AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList", true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
+                AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink()) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
@@ -146,7 +146,7 @@ namespace FastDataTool
         /// <param name="e"></param>
         private void ReLoad_View(object sender, RoutedEventArgs e)
         {
-            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(), "loadColumnList") ?? new List<BaseTable>(), AppCache.GetBuildLink());
+            AppCache.SetViewList(DataSchema.ViewList(AppCache.GetBuildLink(),true) ?? new List<BaseTable>(), AppCache.GetBuildLink());
             Dtable.DataContext = AppCache.GetViewList(AppCache.GetBuildLink());
         }
         #endregion
@@ -500,18 +500,7 @@ namespace FastDataTool
         }
         #endregion
 
-        #region 数据迁移
-        /// <summary>
-        /// 数据迁移
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            //Common.OpenWin(new DataMove_1(), this);
-        }
-        #endregion
-
+  
         #region 编辑表备注
         /// <summary>
         /// 编辑表备注
@@ -528,6 +517,7 @@ namespace FastDataTool
             AppCache.SetTableList(list, AppCache.GetBuildLink());
 
             DataSchema.UpdateTabComments(e.Row.Item as BaseTable, AppCache.GetBuildLink());
+            
         }
         #endregion
 
@@ -736,12 +726,12 @@ namespace FastDataTool
             try
             {
                 var path = string.Format("{0}chm", AppDomain.CurrentDomain.BaseDirectory);
-                
-                if (txtFile != "")
-                    path = txtFile;
 
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
+
+                if (txtFile != "")
+                    path = txtFile;
 
                 //生成list
                 var list = new List<ChmModel>();
@@ -760,7 +750,7 @@ namespace FastDataTool
                         list.Add(model);
                     }
                 }
-                
+
                 if (list.Count == 0)
                 {
                     CodeBox.Show("请选择要生成表", this);
@@ -769,116 +759,16 @@ namespace FastDataTool
 
 
                 Chm.CreateHhp(path);
-                Chm.CreateHhc(path,list);
-                Chm.CreateHhk(path,list);
-                Chm.Compile(path,list);
+                Chm.CreateHhc(path, list);
+                Chm.CreateHhk(path, list);
+                Chm.Compile(path, list);
 
                 CodeBox.Show("生成成功", this);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 CodeBox.Show("生成失败", this);
             }
-        }
-        #endregion
-
-       
-       
-        #region 生成建表语句
-        /// <summary>
-        /// 生成建表语句
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Bulid_Table(object sender, RoutedEventArgs e)
-        {
-            var bat = new StringBuilder();
-            var path = string.Format("{0}sql", AppDomain.CurrentDomain.BaseDirectory);
-
-            if (txtFile != "")
-                path = txtFile + "\\sql";
-
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-
-            foreach (var item in Dtable.Items)
-            {
-                var box = Common.GetTemplateColumn<System.Windows.Controls.CheckBox>(Dtable, 0, "tabBox", item);
-
-                if (box != null && box.IsChecked == true)
-                {
-                    var sql = new StringBuilder();
-                    sql.AppendFormat("create table {0}(\r\n", (item as BaseTable).tabName);
-                    var field = DataSchema.ColumnList(AppCache.GetBuildLink(), (item as BaseTable).tabName) ?? new List<BaseColumn>();
-                    var i = 0;
-                    foreach (var temp in field)
-                    {
-                        if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
-                        {
-                            if (temp.isNull == "是")
-                                sql.AppendFormat("\t{0} {1}{2} comment {3}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",", temp.colComments.Replace("'",""));
-                            else
-                                sql.AppendFormat("\t{0} {1} not null{2} comment {3}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",", temp.colComments.Replace("'", ""));
-                        }
-                        else
-                        {
-                            if (temp.isNull == "是")
-                                sql.AppendFormat("\t{0} {1}{2}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",");
-                            else
-                                sql.AppendFormat("\t{0} {1} not null{2}\r\n", temp.colName, temp.showType, i == field.Count - 1 ? "" : ",");
-                        }
-                        i++;
-                    }
-
-                    if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
-                    {
-                        sql.AppendFormat(")comment={0} ", (item as BaseTable).tabComments.Replace("'", ""));
-                        bat.AppendFormat("mysql -h {0} -u {1} -p {2} < @{3}.sql\r\n", AppCache.GetBuildLink().hostName, AppCache.GetBuildLink().userName, AppCache.GetBuildLink().userPwd, (item as BaseTable).tabName);
-                    }
-                    else
-                        sql.Append(") ");
-
-                    if (AppCache.GetBuildLink().dbType == DataDbType.SqlServer)
-                    {
-                        foreach (var temp in field)
-                        {
-                            if (temp.colComments != "")
-                                sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}','column','{2}';\r\n", temp.colComments.Replace("'", ""), (item as BaseTable).tabName, temp.colName);
-                        }
-                        sql.AppendFormat("execute sp_addextendedproperty 'MS_Description','{0}','user','dbo','table','{1}',null,null;\r\n", (item as BaseTable).tabComments.Replace("'", ""), (item as BaseTable).tabName);
-
-                        bat.AppendFormat("sqlcmd -U {0} -P {1} -i @{2}.sql\r\n", AppCache.GetBuildLink().userName, AppCache.GetBuildLink().userPwd, (item as BaseTable).tabName);
-                    }
-
-                    if (AppCache.GetBuildLink().dbType == DataDbType.Oracle)
-                    {
-                        sql.Append("\r\n tablespace USERS pctfree 10 initrans 1 maxtrans 255 storage(initial 64K minextents 1 maxextents unlimited);\r\n");
-                        foreach(var temp in field)
-                        {
-                            if (temp.colComments != "")
-                                sql.AppendFormat("comment on column {0}.{1} is '{2}'; \r\n", (item as BaseTable).tabName, temp.colName, temp.colComments.Replace("'", ""));
-                        }
-                        sql.AppendFormat("comment on table {0} is '{1}';\r\n", (item as BaseTable).tabName, (item as BaseTable).tabComments.Replace("'", ""));
-
-                        bat.AppendFormat("sqlplus {0}/{1}@{2} @{3}.sql> CreateTable.log\r\n", AppCache.GetBuildLink().userName, AppCache.GetBuildLink().userPwd, AppCache.GetBuildLink().serverValue, (item as BaseTable).tabName);
-                    }
-
-                    File.WriteAllText(string.Format("{0}/{1}.sql", path, (item as BaseTable).tabName), sql.ToString(), Encoding.UTF8);
-                }
-            }
-
-            bat.Append("exit;");
-
-            if (AppCache.GetBuildLink().dbType == DataDbType.Oracle)
-                File.WriteAllText(string.Format("{0}/Oracle.bat", path), bat.ToString(), Encoding.UTF8);
-
-            if (AppCache.GetBuildLink().dbType == DataDbType.MySql)
-                File.WriteAllText(string.Format("{0}/MySql.bat", path), bat.ToString(), Encoding.UTF8);
-
-            if (AppCache.GetBuildLink().dbType == DataDbType.SqlServer)
-                File.WriteAllText(string.Format("{0}/SqlServer.bat", path), bat.ToString(), Encoding.UTF8);
-
-            CodeBox.Show("生成成功", this);
         }
         #endregion
     }
