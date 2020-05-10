@@ -7,6 +7,7 @@ using Oracle.ManagedDataAccess.Client;
 using MySql.Data.MySqlClient;
 using System.Linq;
 using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace DataModel
 {
@@ -89,7 +90,7 @@ namespace DataModel
                     table.tabComments = item.ItemArray[1] == DBNull.Value ? "" : item.ItemArray[1].ToString();
                     table.tabName = item.ItemArray[0] == DBNull.Value ? "" : item.ItemArray[0].ToString();
                     list.Add(table);
-                    ColumnList(link, table.tabName, conn,isUpdate);
+                    Parallel.Invoke(() => { ColumnList(link, table.tabName, conn, isUpdate); });
                 }
 
                 conn.Close();
@@ -164,7 +165,7 @@ namespace DataModel
                     table.tabComments = "";
                     table.tabName = item.ItemArray[0] == DBNull.Value ? "" : item.ItemArray[0].ToString();
                     list.Add(table);
-                    ColumnList(link, table.tabName, conn,isUpdate);
+                    Parallel.Invoke(() => { ColumnList(link, table.tabName, conn, isUpdate); });
                 }
                 conn.Close();
                 return list;
