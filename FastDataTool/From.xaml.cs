@@ -88,20 +88,19 @@ namespace FastDataTool
             var info = new EntityInfo();
             var list = new List<BaseColumn>();
             
-            foreach(var item in AppCache.GetFromList())
-            {
+            AppCache.GetFromList().ForEach(a => {
                 var temp = new BaseColumn();
-                temp.colId = item.colId;
-                temp.fromName = item.fromName;
-                temp.fromParam = item.fromParam;
-                temp.fromType = item.fromType ?? "text";
-                temp.colLength = item.maxLength;
-                temp.isNull = item.isNull;
-                temp.colComments = item.colComments;
-                temp.colName = item.colName;
-                temp.colType = item.colType;
+                temp.colId = a.colId;
+                temp.fromName = a.fromName;
+                temp.fromParam = a.fromParam;
+                temp.fromType = a.fromType ?? "text";
+                temp.colLength = a.maxLength;
+                temp.isNull = a.isNull;
+                temp.colComments = a.colComments;
+                temp.colName = a.colName;
+                temp.colType = a.colType;
                 list.Add(temp);
-            }
+            });
 
             info.columns = list;
             info.modelFile = txtFile;
