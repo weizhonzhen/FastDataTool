@@ -59,17 +59,16 @@ namespace FastDataTool
                     write.WriteLine("<head></head>");
                     write.WriteLine("<object type=\"text/site properties\"><param name=\"Window Styles\" value=\"0x800025\"></object>");
 
-                    foreach (var item in list)
-                    {
+                    list.ForEach(p => {
                         write.WriteLine("<ul>");
                         write.WriteLine("<li><object type=\"text/sitemap\">");
-                        write.WriteLine("<param name=\"Name\" value=\"" + item.tabName + "\">");
-                        write.WriteLine("<param name=\"Local\" value=\"" + path + "\\" + item.tabName + ".htm\">");
+                        write.WriteLine("<param name=\"Name\" value=\"" + p.tabName + "\">");
+                        write.WriteLine("<param name=\"Local\" value=\"" + path + "\\" + p.tabName + ".htm\">");
                         write.WriteLine("<param name=\"ImageNumber\" value=\"user\">");
                         write.WriteLine("</object></li>");
                         write.WriteLine("</ul>");
 
-                        using (var htmlStream = new FileStream(string.Format("{0}\\" + item.tabName + ".htm", path), FileMode.Create))
+                        using (var htmlStream = new FileStream(string.Format("{0}\\" + p.tabName + ".htm", path), FileMode.Create))
                         {
                             using (var html = new StreamWriter(htmlStream, Encoding.GetEncoding("GB18030")))
                             {
@@ -77,25 +76,24 @@ namespace FastDataTool
                                 sb.Append("<html><head></head><body>");
                                 sb.Append("<style>table,table tr th, table tr td {border:1px solid #000;} table { width:100%;background-color:#f6f6f6; min-height: 28px; line-height: 25px; text-align: center; border-collapse: collapse; padding:2px;}</style>");
                                 sb.Append("<table><tr>");
-                                sb.AppendFormat("<td>{0}</td>", item.tabName);
-                                sb.AppendFormat("<td colspan='3'>{0}</td>", item.tabComments);
+                                sb.AppendFormat("<td>{0}</td>", p.tabName);
+                                sb.AppendFormat("<td colspan='3'>{0}</td>", p.tabComments);
                                 sb.Append("</tr>");
 
-                                foreach (var temp in item.columns)
-                                {
+                                p.columns.ForEach(a => {
                                     sb.Append("<tr>");
-                                    sb.AppendFormat("<td width='30%'>{0}</td>", temp.colName);
-                                    sb.AppendFormat("<td width='40%'>{0}</td>", temp.colComments);
-                                    sb.AppendFormat("<td width='20%'>{0}</td>", temp.showType);
-                                    sb.AppendFormat("<td width='10%'>{0}</td>", temp.isNull);
+                                    sb.AppendFormat("<td width='30%'>{0}</td>", a.colName);
+                                    sb.AppendFormat("<td width='40%'>{0}</td>", a.colComments);
+                                    sb.AppendFormat("<td width='20%'>{0}</td>", a.showType);
+                                    sb.AppendFormat("<td width='10%'>{0}</td>", a.isNull);
                                     sb.Append("</tr>");
-                                }
+                                });
 
                                 sb.Append("</table></body></html>");
                                 html.Write(sb);
                             }
                         }
-                    }
+                    });
 
                     write.WriteLine("</body></html>");
                 }
@@ -119,13 +117,12 @@ namespace FastDataTool
                     write.WriteLine("<body>");
                     write.WriteLine("<ul>");
 
-                    foreach (var item in list)
-                    {
+                    list.ForEach(a => {
                         write.WriteLine("<li><object type=\"text/sitemap\">");
-                        write.WriteLine("<param name=\"Name\" value=\"" + item.tabName + "\">");
-                        write.WriteLine("<param name=\"Local\" value=\"" + item.tabName + ".htm\">");
+                        write.WriteLine("<param name=\"Name\" value=\"" + a.tabName + "\">");
+                        write.WriteLine("<param name=\"Local\" value=\"" + a.tabName + ".htm\">");
                         write.WriteLine("</object></li>");
-                    }
+                    });
 
                     write.WriteLine("</ul>");
                     write.WriteLine("</body>");
@@ -156,10 +153,9 @@ namespace FastDataTool
                 process.WaitForExit();
             }
 
-            foreach (var item in list)
-            {
-                File.Delete(string.Format("{0}\\{1}.htm", path, item.tabName));
-            }
+            list.ForEach(a => {
+                File.Delete(string.Format("{0}\\{1}.htm", path, a.tabName));
+            });
 
             File.Delete(string.Format("{0}\\table.hhc", path));
             File.Delete(string.Format("{0}\\table.hhk", path));
