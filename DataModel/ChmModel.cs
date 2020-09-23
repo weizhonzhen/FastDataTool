@@ -26,23 +26,23 @@ namespace DataModel
         public List<BaseColumn> disColType(List<BaseColumn> list)
         {
             var rList = new List<BaseColumn>();
-            foreach (var item in list)
-            {
-                if (item.isKey)
-                    item.colComments = string.Format("(主键){0}", item.colComments);
+    
+            list.ForEach(a => {
+                if (a.isKey)
+                    a.colComments = string.Format("(主键){0}", a.colComments);
 
-                if (item.isIndex)
-                    item.colComments = string.Format("(索引){0}", item.colComments);
+                if (a.isIndex)
+                    a.colComments = string.Format("(索引){0}", a.colComments);
 
-                if (item.colType == "decimal" || item.colType == "byte" || item.colType == "short" || item.colType == "int"
-                                || item.colType == "TimeSpan" || item.colType == "long" || item.colType == "float" || item.colType == "double"
-                                || item.colType == "bool" || item.colType == "DateTime" || item.colType == "Guid")
-                    item.showNull = "?";
+                if (a.colType == "decimal" || a.colType == "byte" || a.colType == "short" || a.colType == "int"
+                                || a.colType == "TimeSpan" || a.colType == "long" || a.colType == "float" || a.colType == "double"
+                                || a.colType == "bool" || a.colType == "DateTime" || a.colType == "Guid")
+                    a.showNull = "?";
                 else
-                    item.showNull = "";
+                    a.showNull = "";
 
-                rList.Add(item);
-            }
+                rList.Add(a);
+            });
             return rList;
         }
     }

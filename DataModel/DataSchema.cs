@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
@@ -91,7 +91,7 @@ namespace DataModel
                     table.tabName = item.ItemArray[0] == DBNull.Value ? "" : item.ItemArray[0].ToString();
                     list.Add(table);
                     Parallel.Invoke(() => { ColumnList(link, table.tabName, conn, isUpdate); });
-                }
+                }               
 
                 conn.Close();
                 return list;

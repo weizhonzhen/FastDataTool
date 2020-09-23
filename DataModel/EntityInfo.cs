@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace DataModel
@@ -87,7 +87,7 @@ namespace DataModel
         public List<BaseColumn> disColType(List<BaseColumn> list, string Language)
         {
             var rList = new List<BaseColumn>();
-            foreach (var item in list)
+            list.ForEach(item =>
             {
                 if (Language.ToUpper() == "C#")
                     item.colType = GetCsType(item.colType);
@@ -122,19 +122,19 @@ namespace DataModel
                 if (item.colType == "decimal" || item.colType == "byte" || item.colType == "short" || item.colType == "int"
                                 || item.colType == "TimeSpan" || item.colType == "long" || item.colType == "float" || item.colType == "double"
                                 || item.colType == "bool" || item.colType == "DateTime" || item.colType == "Guid")
-                    item.showNull = "?";                
+                    item.showNull = "?";
                 else
                     item.showNull = "";
 
                 item.maxMessage = "{0}最大长度" + item.colLength;
 
-                if (item.isNull=="否")
+                if (item.isNull == "否")
                     item.requiredMessage = "[Required(ErrorMessage = \"{0}不能为空\")]";
                 else
                     item.requiredMessage = "";
 
                 rList.Add(item);
-            }
+            });
             return rList;
         }
         #endregion
