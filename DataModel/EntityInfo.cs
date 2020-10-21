@@ -126,7 +126,8 @@ namespace DataModel
                 else
                     item.showNull = "";
 
-                item.maxMessage = "{0}最大长度" + item.colLength;
+                if (item.colType == "string")
+                    item.maxMessage = "{0}最大长度" + item.colLength;
 
                 if (item.isNull == "否")
                     item.requiredMessage = "[Required(ErrorMessage = \"{0}不能为空\")]";
