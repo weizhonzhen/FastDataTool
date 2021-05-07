@@ -264,8 +264,10 @@ namespace DataModel
                     return "float";
 
                 case "bigint":
-                case "number":
                     return "Long";
+
+                case "number":
+                    return "Number";
 
                 case "tinyint":
                     return "byte";
