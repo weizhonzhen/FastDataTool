@@ -5,9 +5,9 @@ using System.Windows.Controls;
 using DataModel;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Data.Common;
 using Oracle.ManagedDataAccess.Client;
 using System.Data.SqlClient;
@@ -88,7 +88,7 @@ namespace FastDataTool
             this.Visibility = System.Windows.Visibility.Hidden;
         }
         #endregion
-
+        
         #region 退出数据工具
         /// <summary>
         /// 退出数据工具
@@ -134,7 +134,7 @@ namespace FastDataTool
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Load_OneTable(object sender,RoutedEventArgs e)
+        private void Load_OneTable(object sender, RoutedEventArgs e)
         {
             DbConnection conn = null;
             var link = AppCache.GetBuildLink();
@@ -145,7 +145,16 @@ namespace FastDataTool
             if (link.dbType == DataDbType.MySql)
                 conn = new MySqlConnection(link.connStr);
             conn.Open();
+
+            var tableList = AppCache.GetTableList(link);
+            var table = DataSchema.TableList(link, false, txtTable.Text.Trim()).First();
+
+            tableList.Remove(table);
+            tableList.Add(table);
+
+            AppCache.SetTableList(tableList, link);
             DataSchema.ColumnList(link, txtTable.Text.Trim(), conn, true);
+
             conn.Close();
             Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
             Query_Table(sender, e);
