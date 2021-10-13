@@ -34,7 +34,7 @@ namespace DataModel
         /// <param name="dbType">数据库类型</param>
         /// <param name="strConn">连接串</param>
         /// <returns></returns>
-        public static List<BaseTable> TableList(DataLink link,bool isUpdate=false)
+        public static List<BaseTable> TableList(DataLink link,bool isUpdate=false,string tableName="")
         {
             try
             {
@@ -51,6 +51,8 @@ namespace DataModel
                     var cmd = conn.CreateCommand();
                     cmd.CommandText = "select distinct a.table_name,comments from all_tables a inner join all_tab_comments b on a.TABLE_NAME=b.TABLE_NAME and a.TABLESPACE_NAME!='SYSAUX' and a.TABLESPACE_NAME!='SYSTEM'";
 
+                    if (tableName != "")
+                        cmd.CommandText = cmd.CommandText + " and a.table_name='" + tableName + "'";
                     var rd = cmd.ExecuteReader();
                     dt.Load(rd);
                     #endregion
@@ -65,6 +67,8 @@ namespace DataModel
                     var cmd = conn.CreateCommand();
                     cmd.CommandText = "select name,(select top 1 value from sys.extended_properties where major_id=object_id(a.name) and minor_id=0) as value from sys.objects a where type='U'";
 
+                    if (tableName != "")
+                        cmd.CommandText = cmd.CommandText + " and name='" + tableName + "'";
                     var rd = cmd.ExecuteReader();
                     dt.Load(rd);
                     #endregion
@@ -79,6 +83,8 @@ namespace DataModel
                     var cmd = conn.CreateCommand();
                     cmd.CommandText = string.Format("select table_name, table_comment from information_schema.TABLES where table_schema='{0}' and table_type='BASE TABLE'", link.serverValue);
 
+                    if (tableName != "")
+                        cmd.CommandText = cmd.CommandText + " and table_name='" + tableName + "'";
                     var rd = cmd.ExecuteReader();
                     dt.Load(rd);
                     #endregion
