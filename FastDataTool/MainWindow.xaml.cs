@@ -8,6 +8,10 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text;
+using System.Data.Common;
+using Oracle.ManagedDataAccess.Client;
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace FastDataTool
 {
@@ -124,6 +128,30 @@ namespace FastDataTool
         }
         #endregion
 
+        #region 更新单个表结构 
+        /// <summary>
+        /// 更新单个表结构
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Load_OneTable(object sender,RoutedEventArgs e)
+        {
+            DbConnection conn = null;
+            var link = AppCache.GetBuildLink();
+            if (link.dbType == DataDbType.Oracle)
+                conn = new OracleConnection(link.connStr);
+            if (link.dbType == DataDbType.SqlServer)
+                conn = new SqlConnection(link.connStr);
+            if (link.dbType == DataDbType.MySql)
+                conn = new MySqlConnection(link.connStr);
+            conn.Open();
+            DataSchema.ColumnList(link, txtTable.Text.Trim(), conn, true);
+            conn.Close();
+            Dtable.DataContext = AppCache.GetTableList(AppCache.GetBuildLink());
+            Query_Table(sender, e);
+        }
+        #endregion
+
         #region 显示视图结构
         /// <summary>
         /// 显示视图结构
@@ -225,6 +253,8 @@ namespace FastDataTool
                     entiy.isMap = (bool)isMap.IsChecked;
                     entiy.isModel = (bool)isModel.IsChecked;
                     entiy.isOldModel = (bool)isOldModel.IsChecked;
+                    entiy.columns.ForEach(a => { if (a.isKey) entiy.table.KeyName = a.colName; });
+                    entiy.table.KeyName = entiy.table.KeyName ?? "";
 
                     if (DataDbType.Oracle == AppCache.GetBuildLink().dbType)
                         entiy.param = ":";

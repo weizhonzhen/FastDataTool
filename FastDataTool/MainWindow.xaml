@@ -20,10 +20,10 @@
         <TextBox Name="txtTable" Height="23" Margin="84,48,366,0" TextWrapping="Wrap" Text="" VerticalContentAlignment="Center"  VerticalAlignment="Top"/>
         <Label Content="备注：" HorizontalAlignment="Left" Margin="296,45,0,0" VerticalAlignment="Top" Height="26" Width="46"/>
         <TextBox Name="txtComments" HorizontalAlignment="Left" Height="23" VerticalContentAlignment="Center" Margin="348,48,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="195"/>
-        <Button Content="查 询" HorizontalAlignment="Left" Margin="563,48,0,0" VerticalAlignment="Top" Width="59" Click="Query_Table" Height="22"/>
-        <Button x:Name="nextTable" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="12,49,0,0" VerticalAlignment="Top" Width="57" Click="Next_Table"/>
-        <Button x:Name="bulidChm" Content="生成CHM" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="87,49,0,0" VerticalAlignment="Top" Width="65" Click="Bulid_Chm"/>
-        <Button x:Name="bulidTable" Content="建表语句" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="174,49,0,0" VerticalAlignment="Top" Width="65" Click="Bulid_Table"/>
+        <Button Content="查 询" HorizontalAlignment="Left" Margin="24,49,0,0" VerticalAlignment="Top" Width="59" Click="Query_Table" Height="22" Grid.Column="1"/>
+        <Button x:Name="nextTable" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="93,49,0,0" VerticalAlignment="Top" Width="57" Click="Next_Table"/>
+        <Button x:Name="bulidChm" Content="生成CHM" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="161,48,0,0" VerticalAlignment="Top" Width="65" Click="Bulid_Chm"/>
+        <Button x:Name="bulidTable" Content="建表语句" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="237,48,0,0" VerticalAlignment="Top" Width="65" Click="Bulid_Table"/>
 
         <RadioButton GroupName="radioGroup" x:Name="isMap" Content="Map" Margin="446,84,131,0" VerticalAlignment="Top"/>
         <RadioButton GroupName="radioGroup" x:Name="isModel" IsChecked="True" Content="Model" Margin="502,84,62,0" VerticalAlignment="Top" RenderTransformOrigin="1.057,0.562"/>
@@ -108,5 +108,6 @@
         <TextBox x:Name="findColRemark" Grid.Column="1" VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="23" Margin="0,525,129,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="160"/>
         <Button Name="QueryColumn" Content="查询列" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="198,525,0,0" VerticalAlignment="Top" Width="55" RenderTransformOrigin="0.92,0.227" Click="Query_Column"/>
         <Button x:Name="NextColumn" Content="下一个" Height="22" Grid.Column="1" HorizontalAlignment="Left" Margin="263,525,0,0" VerticalAlignment="Top" Width="50" Click="Next_Column"/>
+        <Button Content="加载单表结构" HorizontalAlignment="Left" Margin="554,49,0,0" VerticalAlignment="Top" Width="85" Click="Load_OneTable" Height="22" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>
