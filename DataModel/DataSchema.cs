@@ -23,7 +23,7 @@ namespace DataModel
         /// <returns></returns>
         public static string GetColumnKey(DataLink link, string tableName)
         {
-            return string.Format("{0}_{1}_{2}", link.dbType, tableName, link.hostName);
+            return string.Format("{0}_{1}_{2}", link.dbType, tableName, link.hostName).ToLower();
         }
         #endregion
 
