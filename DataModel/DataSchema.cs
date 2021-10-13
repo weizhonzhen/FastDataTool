@@ -14,7 +14,7 @@ namespace DataModel
     /// <summary>
     /// 表结构
     /// </summary>
-    public class DataSchema
+    public class DataSchema 
     {
         #region 列缓存键
         /// <summary>
