@@ -52,7 +52,7 @@ namespace DataModel
                     cmd.CommandText = "select distinct a.table_name,comments from all_tables a inner join all_tab_comments b on a.TABLE_NAME=b.TABLE_NAME and a.TABLESPACE_NAME!='SYSAUX' and a.TABLESPACE_NAME!='SYSTEM'";
 
                     if (tableName != "")
-                        cmd.CommandText = cmd.CommandText + " and a.table_name='" + tableName + "'";
+                        cmd.CommandText = cmd.CommandText + " and a.table_name='" + tableName.ToUpper() + "'";
                     var rd = cmd.ExecuteReader();
                     dt.Load(rd);
                     #endregion
@@ -84,7 +84,7 @@ namespace DataModel
                     cmd.CommandText = string.Format("select table_name, table_comment from information_schema.TABLES where table_schema='{0}' and table_type='BASE TABLE'", link.serverValue);
 
                     if (tableName != "")
-                        cmd.CommandText = cmd.CommandText + " and table_name='" + tableName + "'";
+                        cmd.CommandText = cmd.CommandText + " and table_name='" + tableName.ToUpper() + "'";
                     var rd = cmd.ExecuteReader();
                     dt.Load(rd);
                     #endregion
