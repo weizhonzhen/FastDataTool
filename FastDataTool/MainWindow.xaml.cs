@@ -149,7 +149,8 @@ namespace FastDataTool
             var tableList = AppCache.GetTableList(link);
             var table = DataSchema.TableList(link, false, txtTable.Text.Trim()).First();
 
-            tableList.Remove(table);
+            tableList.RemoveAll(a => a.tabName.ToLower() == table.tabName.ToLower());
+
             tableList.Add(table);
 
             AppCache.SetTableList(tableList, link);
