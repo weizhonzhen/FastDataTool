@@ -242,7 +242,7 @@ namespace DataModel
                                     (SELECT count(0) FROM sysindexes aa JOIN sysindexkeys bb ON aa.id=bb.id AND aa.indid=bb.indid 
                                         JOIN sysobjects cc ON bb.id=cc.id  JOIN syscolumns dd ON bb.id=dd.id AND bb.colid=dd.colid 
                                         WHERE aa.indid NOT IN(0,255) AND cc.name='" + tableName + @"' and dd.name=a.name),
-                                    isnullable,prec,scale,REPLACE(REPLACE(REPLACE(REPLACE( t2.text,'((',''),'))',''),'(N''',''),''')','')
+                                    isnullable,prec,scale,''
                                     from syscolumns a left join sys.extended_properties b 
                                     on major_id = id and minor_id = colid and b.name ='MS_Description' 
                                     where a.id=object_id('" + tableName + "') order by a.colid asc";
